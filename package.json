@@ -1,0 +1,19 @@
+{
+  "name": "queueoverflowsuper",
+  "version": "1.0.0",
+  "description": "Queueoverflow app",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release:shared": "cd libs/shared && yarn install && yarn prepare && npm publish --access=public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hooannn/QueueOverflow.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hooannn/QueueOverflow/issues"
+  },
+  "homepage": "https://github.com/Hooannn/QueueOverflow#readme"
+}
