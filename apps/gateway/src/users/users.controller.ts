@@ -85,7 +85,6 @@ export class UsersController {
     delete updateUserDto.roles;
     delete updateUserDto.password;
     const user = await this.usersService.update(userId, updateUserDto, userId);
-
     return new Response<User>({
       code: 200,
       success: true,
@@ -119,7 +118,6 @@ export class UsersController {
   @Roles(Role.Admin)
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(+id);
-
     return new Response<User>({
       code: 200,
       success: true,

@@ -1,6 +1,6 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
@@ -49,12 +49,12 @@
   },
   "files": [
     "build/lib/*",
-    "build/umd/*",
-    "src"
+    "build/umd/*"
   ],
   
   "devDependencies": {
-    "@nestjs/mapped-types": "^2.0.2",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/mapped-types": "*",
     "@types/node": "^10.11.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
