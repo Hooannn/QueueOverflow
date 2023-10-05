@@ -1,20 +1,22 @@
 {
   "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "target": "ES2021",
-    "module": "ESNext",
-    "lib": ["es2015", "es2016", "es2017", "dom"],
-    "strict": true,
     "allowSyntheticDefaultImports": true,
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
+    "strict": true,
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./build/lib",
+    "tsBuildInfoFile": "./build/.tsbuildinfo",
+    "jsx": "react",
     "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "target": "ES2021",
     "sourceMap": true,
     "baseUrl": "./",
     "incremental": true,
@@ -25,7 +27,5 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"],
 }

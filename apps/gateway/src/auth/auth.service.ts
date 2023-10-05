@@ -7,16 +7,14 @@ import {
 } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { generatePassword } from 'src/utils/password';
 import Redis from 'ioredis';
 import { hashSync, compareSync } from 'bcrypt';
 import config from 'src/configs';
-import { RefreshDto } from './dto/refresh-dto';
 import { HttpService } from '@nestjs/axios';
-import { Role } from 'src/users/entities/user.entity';
 import { ClientProxy } from '@nestjs/microservices';
+import { Role } from '@queueoverflow/shared/entities';
+import { generatePassword } from '@queueoverflow/shared/utils';
+import { SignInDto, SignUpDto, RefreshDto } from '@queueoverflow/shared/dtos';
 export interface JwtPayloads {
   userId: string;
   roles: [Role];

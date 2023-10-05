@@ -1,25 +1,31 @@
-import { IsString, IsEmail, Length, ArrayMinSize, IsOptional } from 'class-validator'
-import { Role } from 'src/entities'
+import {
+  IsString,
+  IsEmail,
+  Length,
+  ArrayMinSize,
+  IsOptional,
+} from "class-validator";
+import { Role } from "../../entities";
 
 export class CreateUserDto {
   @IsString()
-  first_name: string
+  first_name: string;
 
   @IsString()
-  last_name: string
+  last_name: string;
 
   @IsEmail()
-  email: string
+  email: string;
 
   @IsOptional()
   @IsString()
-  avatar?: string
+  avatar?: string;
 
   @Length(6, 6)
   @IsString()
-  password: string
+  password: string;
 
   @IsOptional()
   @ArrayMinSize(1)
-  roles?: Role[]
+  roles?: Role[];
 }

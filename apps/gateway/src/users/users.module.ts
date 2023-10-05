@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { RedisModule } from 'src/redis/redis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User } from '@queueoverflow/shared/entities';
 @Module({
   imports: [RedisModule, TypeOrmModule.forFeature([User])],
   controllers: [UsersController],

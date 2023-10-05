@@ -5,16 +5,18 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { compareSync, hashSync } from 'bcrypt';
 import config from 'src/configs';
 import Redis from 'ioredis';
-import { QueryDto } from 'src/utils/query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
+import {
+  CreateUserDto,
+  QueryDto,
+  ChangePasswordDto,
+  UpdateUserDto,
+} from '@queueoverflow/shared/dtos';
+import { User } from '@queueoverflow/shared/entities';
 
 @Injectable()
 export class UsersService {
@@ -64,7 +66,6 @@ export class UsersService {
 
   async findAll(query: QueryDto) {
     try {
-      console.log(query);
       const [data, total] = await Promise.all([
         this.usersRepository.find({
           select: this.findOptionsSelect,

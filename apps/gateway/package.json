@@ -22,7 +22,7 @@
     "schema:sync": "typeorm schema:sync"
   },
   "dependencies": {
-    "@queueoverflow/shared": "../../libs/shared/dist/lib",
+    "@queueoverflow/shared": "^0.0.4",
     "@nestjs-modules/mailer": "^1.9.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",

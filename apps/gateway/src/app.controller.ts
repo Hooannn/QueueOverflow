@@ -2,8 +2,7 @@ import { Controller, ForbiddenException, Get } from '@nestjs/common';
 import { Public } from './auth/auth.guard';
 import config from './configs';
 import { AuthService } from './auth/auth.service';
-import { Role } from './users/entities/user.entity';
-
+import { Role } from '@queueoverflow/shared/entities';
 @Controller()
 export class AppController {
   constructor(private readonly authService: AuthService) {}

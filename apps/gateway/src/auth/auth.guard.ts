@@ -11,7 +11,7 @@ import { Request } from 'express';
 import config from 'src/configs';
 import { ROLES_KEY } from './auth.roles';
 import { PinoLogger } from 'nestjs-pino';
-import { Role } from 'src/users/entities/user.entity';
+import { Role } from '@queueoverflow/shared/entities';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

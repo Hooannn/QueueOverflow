@@ -13,15 +13,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User, Role } from './entities/user.entity';
 import { Roles } from 'src/auth/auth.roles';
 import { hashSync } from 'bcrypt';
 import config from 'src/configs';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import Response from 'src/utils/response.entity';
-import { QueryDto } from 'src/utils/query.dto';
+import { Role, User } from '@queueoverflow/shared/entities';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  QueryDto,
+  UpdateUserDto,
+} from '@queueoverflow/shared/dtos';
+import { Response } from '@queueoverflow/shared/utils';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

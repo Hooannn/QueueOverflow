@@ -8,15 +8,17 @@ import {
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CheckUserDto } from './dto/check-user.dto';
 import { isEmail } from 'class-validator';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
 import { Public } from './auth.guard';
-import { RefreshDto } from './dto/refresh-dto';
 import { UsersService } from 'src/users/users.service';
-import Response from 'src/utils/response.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '@queueoverflow/shared/entities';
+import { Response } from '@queueoverflow/shared/utils';
+import {
+  CheckUserDto,
+  SignInDto,
+  SignUpDto,
+  RefreshDto,
+} from '@queueoverflow/shared/dtos';
 
 @Controller('auth')
 export class AuthController {
