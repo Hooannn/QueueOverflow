@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { LoggerModule } from 'nestjs-pino';
 import config from './configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisModule } from './redis/redis.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -25,6 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             : undefined,
       },
     }),
+    RedisModule
   ],
   controllers: [AppController],
 })

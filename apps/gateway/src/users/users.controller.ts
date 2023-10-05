@@ -15,7 +15,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Role, User } from './entities/user.entity';
+import { User, Role } from './entities/user.entity';
 import { Roles } from 'src/auth/auth.roles';
 import { hashSync } from 'bcrypt';
 import config from 'src/configs';
