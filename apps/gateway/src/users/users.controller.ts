@@ -117,7 +117,7 @@ export class UsersController {
   @Get(':id')
   @Roles(Role.Admin)
   async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findOne(+id);
+    const user = await this.usersService.findOne(id);
     return new Response<User>({
       code: 200,
       success: true,
@@ -139,7 +139,7 @@ export class UsersController {
       );
     }
     const updatedRecord = await this.usersService.update(
-      +id,
+      id,
       updateUserDto,
       req.auth?.userId,
     );
@@ -155,7 +155,7 @@ export class UsersController {
   @Delete(':id')
   @Roles(Role.Admin)
   async remove(@Param('id') id: string) {
-    await this.usersService.remove(+id);
+    await this.usersService.remove(id);
 
     return new Response<any>({
       code: 200,

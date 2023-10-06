@@ -3,6 +3,7 @@ import { Public } from './auth/auth.guard';
 import config from './configs';
 import { AuthService } from './auth/auth.service';
 import { Role } from '@queueoverflow/shared/entities';
+import { randomUUID } from 'crypto';
 @Controller()
 export class AppController {
   constructor(private readonly authService: AuthService) {}
@@ -19,6 +20,9 @@ export class AppController {
     if (config.NODE_ENV === 'production') {
       throw new ForbiddenException();
     }
-    return await this.authService.getCredentials(-999, [Role.Admin, Role.User]);
+    return await this.authService.getCredentials(randomUUID(), [
+      Role.Admin,
+      Role.User,
+    ]);
   }
 }

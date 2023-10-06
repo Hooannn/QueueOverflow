@@ -18,6 +18,7 @@ import {
   SignInDto,
   SignUpDto,
   RefreshDto,
+  GithubAuthDto,
 } from '@queueoverflow/shared/dtos';
 
 @Controller('auth')
@@ -45,6 +46,19 @@ export class AuthController {
     return new Response<
       Pick<User, 'first_name' | 'last_name' | 'id' | 'email'>
     >({ code: 200, success: true, data: user, message: 'Available user' });
+  }
+
+  @Public()
+  @Post('github')
+  async performAuthenWithGithubProvider(@Body() githubAuthDto: GithubAuthDto) {
+    const res = await this.authService.performAuthenWithGithubProvider(
+      githubAuthDto.code,
+    );
+    return new Response<any>({
+      code: 200,
+      success: true,
+      data: res,
+    });
   }
 
   @Public()

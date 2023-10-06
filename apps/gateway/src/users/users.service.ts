@@ -53,7 +53,7 @@ export class UsersService {
     }
   }
 
-  async create(createUserDto: CreateUserDto, createdBy?: number) {
+  async create(createUserDto: CreateUserDto, createdBy?: string) {
     try {
       const user = this.usersRepository.create(createUserDto);
       const res = await this.usersRepository.save(user);
@@ -85,7 +85,7 @@ export class UsersService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     try {
       const res = await this.usersRepository.findOne({
         select: this.findOptionsSelect,
@@ -130,7 +130,7 @@ export class UsersService {
     }
   }
 
-  async findPasswordById(id: number) {
+  async findPasswordById(id: string) {
     try {
       const res = await this.usersRepository.findOne({
         select: {
@@ -147,7 +147,7 @@ export class UsersService {
     }
   }
 
-  async changePassword(id: number, changePasswordDto: ChangePasswordDto) {
+  async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
     try {
       const user = await this.findPasswordById(id);
       if (!user)
@@ -179,7 +179,7 @@ export class UsersService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto, updatedBy?: number) {
+  async update(id: string, updateUserDto: UpdateUserDto, updatedBy?: string) {
     try {
       await this.usersRepository.update(id, updateUserDto);
 
@@ -189,7 +189,7 @@ export class UsersService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     try {
       const res = await this.usersRepository.delete(id);
       return res;

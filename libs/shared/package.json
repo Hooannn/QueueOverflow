@@ -1,6 +1,6 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.7",
+  "version": "0.0.10",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
@@ -28,17 +28,17 @@
     }
   },
   "typesVersions": {
-        "*": {
-            "dtos": [
-                "./build/lib/dtos/index.d.ts"
-            ],
-            "entities": [
-                "./build/lib/entities/index.d.ts"
-            ],
-            "utils": [
-                "./build/lib/utils/index.d.ts"
-            ]
-        }
+    "*": {
+      "dtos": [
+        "./build/lib/dtos/index.d.ts"
+      ],
+      "entities": [
+        "./build/lib/entities/index.d.ts"
+      ],
+      "utils": [
+        "./build/lib/utils/index.d.ts"
+      ]
+    }
   },
   "scripts": {
     "clean": "rm -rf ./build",
@@ -51,7 +51,6 @@
     "build/lib/*",
     "build/umd/*"
   ],
-  
   "devDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/mapped-types": "*",

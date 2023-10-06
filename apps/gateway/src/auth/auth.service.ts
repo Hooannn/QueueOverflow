@@ -15,9 +15,45 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Role } from '@queueoverflow/shared/entities';
 import { generatePassword } from '@queueoverflow/shared/utils';
 import { SignInDto, SignUpDto, RefreshDto } from '@queueoverflow/shared/dtos';
+import { randomUUID } from 'crypto';
 export interface JwtPayloads {
   userId: string;
   roles: [Role];
+}
+
+export interface GithubUser {
+  login: string;
+  id: number;
+  node_id: string;
+  avatar_url: string;
+  gravatar_id: string;
+  url: string;
+  html_url: string;
+  followers_url: string;
+  following_url: string;
+  gists_url: string;
+  starred_url: string;
+  subscriptions_url: string;
+  organizations_url: string;
+  repos_url: string;
+  events_url: string;
+  received_events_url: string;
+  type: string;
+  site_admin: boolean;
+  name: string | null;
+  company: string | null;
+  blog: string;
+  location: string | null;
+  email: string | null;
+  hireable: boolean | null;
+  bio: string | null;
+  twitter_username: string | null;
+  public_repos: number;
+  public_gists: number;
+  followers: number;
+  following: number;
+  created_at: string;
+  updated_at: string;
 }
 
 @Injectable()
@@ -177,7 +213,7 @@ export class AuthService {
       await this.jwtService.verifyAsync(legalToken ?? '', {
         secret: config.REFRESH_TOKEN_SECRET,
       });
-      const legalUser = await this.usersService.findOne(parseInt(belongsTo));
+      const legalUser = await this.usersService.findOne(belongsTo);
       const { access_token, refresh_token } = await this.getCredentials(
         legalUser.id,
         legalUser.roles,
@@ -203,19 +239,76 @@ export class AuthService {
         user,
         credentials: { access_token, refresh_token },
       };
-    } else {
-      const password = generatePassword().toString();
+    }
+    const password = generatePassword().toString();
+    const hashedPassword = hashSync(password, parseInt(config.SALTED_PASSWORD));
+
+    const createdUser = await this.usersService.create({
+      email,
+      password: hashedPassword,
+      first_name: family_name,
+      last_name: given_name,
+      avatar: picture,
+    });
+
+    const { access_token, refresh_token } = await this.getCredentials(
+      createdUser.id,
+      createdUser.roles,
+    );
+
+    return {
+      user: createdUser,
+      credentials: { access_token, refresh_token },
+    };
+  }
+
+  async performAuthenWithGithubProvider(githubCode: string) {
+    try {
+      const { data } = await this.httpService.axiosRef.post(
+        'https://github.com/login/oauth/access_token',
+        {
+          client_id: config.GITHUB_CLIENT_ID,
+          client_secret: config.GITHUB_CLIENT_SECRET,
+          code: githubCode,
+        },
+      );
+
+      const githubCredentials = this.parsedGithubCredentials(data) as any;
+
+      const { data: githubUser } =
+        await this.httpService.axiosRef.get<GithubUser>(
+          'https://api.github.com/user',
+          {
+            headers: {
+              Authorization: `Bearer ${githubCredentials.access_token}`,
+            },
+          },
+        );
+
+      // TODO: find user by meta_data.github_uid
+      const user = await this.usersService.findOne(`${githubUser.id}`);
+      if (user) {
+        const { access_token, refresh_token } = await this.getCredentials(
+          user.id,
+          user.roles,
+        );
+        return {
+          user,
+          credentials: { access_token, refresh_token },
+        };
+      }
+      const password = randomUUID();
       const hashedPassword = hashSync(
         password,
         parseInt(config.SALTED_PASSWORD),
       );
 
       const createdUser = await this.usersService.create({
-        email,
+        email: githubUser.email,
         password: hashedPassword,
-        first_name: family_name,
-        last_name: given_name,
-        avatar: picture,
+        first_name: githubUser.name ?? githubUser.login,
+        last_name: '',
+        avatar: githubUser.avatar_url,
       });
 
       const { access_token, refresh_token } = await this.getCredentials(
@@ -227,6 +320,22 @@ export class AuthService {
         user: createdUser,
         credentials: { access_token, refresh_token },
       };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  private parsedGithubCredentials(data: string) {
+    try {
+      const keyValuePairs = data.split('&');
+      const parsedData = {};
+      for (const keyValue of keyValuePairs) {
+        const [key, value] = keyValue.split('=');
+        parsedData[key] = decodeURIComponent(value);
+      }
+      return parsedData;
+    } catch (error) {
+      return new Error('Invalid GitHub credentials');
     }
   }
 
@@ -247,7 +356,7 @@ export class AuthService {
   }
 
   async getCredentials(
-    userId: number,
+    userId: string,
     roles: Role[],
   ): Promise<{
     access_token: string;
@@ -263,7 +372,7 @@ export class AuthService {
     return { access_token, refresh_token };
   }
 
-  private generateAccessToken(userId: number, roles: Role[]) {
+  private generateAccessToken(userId: string, roles: Role[]) {
     return this.jwtService.sign(
       { userId, roles },
       {
@@ -273,7 +382,7 @@ export class AuthService {
     );
   }
 
-  private generateRefreshToken(userId: number) {
+  private generateRefreshToken(userId: string) {
     return this.jwtService.sign(
       { userId },
       {

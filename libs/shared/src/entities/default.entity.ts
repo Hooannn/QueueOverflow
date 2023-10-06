@@ -1,6 +1,9 @@
-import { PrimaryGeneratedColumn } from 'typeorm'
+import { PrimaryGeneratedColumn, Generated } from "typeorm";
 
 export class DefaultEntity {
-  @PrimaryGeneratedColumn()
-  id: number
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Generated("increment")
+  idx: number;
 }

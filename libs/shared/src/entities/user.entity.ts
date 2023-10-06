@@ -1,43 +1,49 @@
-import { DefaultEntity } from '.'
-import { Entity, Column } from 'typeorm'
+import { DefaultEntity } from ".";
+import { Entity, Column } from "typeorm";
 
 export enum Role {
-  User = 'user',
-  Admin = 'admin'
+  User = "user",
+  Admin = "admin",
 }
 
-@Entity('users')
+@Entity("users")
 export class User extends DefaultEntity {
   @Column({
     length: 50,
-    nullable: true
+    nullable: true,
   })
-  first_name?: string
+  first_name?: string;
 
   @Column({
     length: 50,
-    nullable: true
+    nullable: true,
   })
-  last_name?: string
+  last_name?: string;
 
   @Column({
-    unique: true
+    unique: true,
   })
-  email: string
+  email: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: Role,
     array: true,
-    default: [Role.User]
+    default: [Role.User],
   })
-  roles: Role[]
+  roles: Role[];
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  avatar?: string
+  avatar?: string;
 
   @Column()
-  password: string
+  password: string;
+
+  @Column({
+    type: "jsonb",
+    nullable: true,
+  })
+  meta_data: any;
 }
