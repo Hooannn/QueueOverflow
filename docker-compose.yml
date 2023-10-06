@@ -2,18 +2,26 @@ version: "3.9"
 
 services:
   gateway:
-    build: apps/gateway
+    build:
+      context: apps/gateway
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/gateway:/app
+      - /app/node_modules
     ports:
-      - "5000:5000"
-    env_file:
-      - ./apps/gateway/.env
+      - "3000:3000"
     environment:
-      - PORT=${PORT}
+      - NODE_ENV=development
   notifications:
-    build: apps/notifications
+    build:
+      context: apps/notifications
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/notifications:/app
+      - /app/node_modules
     ports:
-      - "5001:5001"
+      - "3001:3001"
     environment:
-      - PORT=${PORT}
-    env_file:
-      - ./apps/notifications/.env
+      - NODE_ENV=development
