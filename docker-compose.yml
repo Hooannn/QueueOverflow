@@ -4,8 +4,16 @@ services:
   gateway:
     build: apps/gateway
     ports:
-      - "3000:3000"
+      - "5000:5000"
+    env_file:
+      - ./apps/gateway/.env
+    environment:
+      - PORT=${PORT}
   notifications:
     build: apps/notifications
     ports:
-      - "3001:3001"
+      - "5001:5001"
+    environment:
+      - PORT=${PORT}
+    env_file:
+      - ./apps/notifications/.env
