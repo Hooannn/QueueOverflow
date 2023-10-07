@@ -58,6 +58,7 @@ export class AuthController {
       code: 200,
       success: true,
       data: res,
+      message: 'Signed in with Github successfully',
     });
   }
 

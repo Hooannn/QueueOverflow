@@ -32,6 +32,7 @@ export class UsersService {
     email: true,
     roles: true,
     avatar: true,
+    meta_data: true,
   };
 
   async checkUser(params: { email: string }) {
@@ -105,6 +106,22 @@ export class UsersService {
         select: this.findOptionsSelect,
         where: {
           email,
+        },
+      });
+      return res;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async findOneByGithubUid(githubUid: number) {
+    try {
+      const res = await this.usersRepository.findOne({
+        select: this.findOptionsSelect,
+        where: {
+          meta_data: {
+            github_uid: githubUid,
+          },
         },
       });
       return res;

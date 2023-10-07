@@ -240,7 +240,7 @@ export class AuthService {
         credentials: { access_token, refresh_token },
       };
     }
-    const password = generatePassword().toString();
+    const password = randomUUID();
     const hashedPassword = hashSync(password, parseInt(config.SALTED_PASSWORD));
 
     const createdUser = await this.usersService.create({
@@ -275,6 +275,10 @@ export class AuthService {
 
       const githubCredentials = this.parsedGithubCredentials(data) as any;
 
+      if (!githubCredentials.access_token) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
       const { data: githubUser } =
         await this.httpService.axiosRef.get<GithubUser>(
           'https://api.github.com/user',
@@ -285,9 +289,34 @@ export class AuthService {
           },
         );
 
-      // TODO: find user by meta_data.github_uid
-      const user = await this.usersService.findOne(`${githubUser.id}`);
-      if (user) {
+      const existedEmailUser = githubUser.email
+        ? await this.usersService.findOneByEmail(githubUser.email)
+        : null;
+
+      const existedGithubUidUser = await this.usersService.findOneByGithubUid(
+        githubUser.id,
+      );
+
+      if (
+        existedEmailUser &&
+        existedGithubUidUser &&
+        existedEmailUser.id !== existedGithubUidUser.id
+      ) {
+        await this.usersService.remove(existedGithubUidUser.id);
+        const user = await this.usersService.update(existedEmailUser.id, {
+          first_name:
+            existedEmailUser.first_name != ''
+              ? existedEmailUser.first_name
+              : existedGithubUidUser.first_name ?? '',
+          last_name:
+            existedEmailUser.last_name != ''
+              ? existedEmailUser.last_name
+              : existedGithubUidUser.last_name ?? '',
+          avatar: existedEmailUser.avatar ?? existedGithubUidUser.avatar,
+          meta_data: {
+            github_uid: githubUser.id,
+          },
+        });
         const { access_token, refresh_token } = await this.getCredentials(
           user.id,
           user.roles,
@@ -297,6 +326,43 @@ export class AuthService {
           credentials: { access_token, refresh_token },
         };
       }
+
+      if (existedEmailUser) {
+        const shouldUpdate = !existedEmailUser.meta_data?.github_uid;
+        const user = shouldUpdate
+          ? await this.usersService.update(existedEmailUser.id, {
+              meta_data: {
+                github_uid: githubUser.id,
+              },
+            })
+          : existedEmailUser;
+        const { access_token, refresh_token } = await this.getCredentials(
+          user.id,
+          user.roles,
+        );
+        return {
+          user,
+          credentials: { access_token, refresh_token },
+        };
+      }
+
+      if (existedGithubUidUser) {
+        const shouldUpdate = !existedGithubUidUser.email && githubUser.email;
+        const user = shouldUpdate
+          ? await this.usersService.update(existedGithubUidUser.id, {
+              email: githubUser.email,
+            })
+          : existedGithubUidUser;
+        const { access_token, refresh_token } = await this.getCredentials(
+          user.id,
+          user.roles,
+        );
+        return {
+          user,
+          credentials: { access_token, refresh_token },
+        };
+      }
+
       const password = randomUUID();
       const hashedPassword = hashSync(
         password,
@@ -304,11 +370,14 @@ export class AuthService {
       );
 
       const createdUser = await this.usersService.create({
-        email: githubUser.email,
+        email: githubUser.email ?? '',
         password: hashedPassword,
         first_name: githubUser.name ?? githubUser.login,
         last_name: '',
         avatar: githubUser.avatar_url,
+        meta_data: {
+          github_uid: githubUser.id,
+        },
       });
 
       const { access_token, refresh_token } = await this.getCredentials(
