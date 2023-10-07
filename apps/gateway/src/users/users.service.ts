@@ -17,12 +17,15 @@ import {
   UpdateUserDto,
 } from '@queueoverflow/shared/dtos';
 import { User } from '@queueoverflow/shared/entities';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject('REDIS') private readonly redisClient: Redis,
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<User> = {
@@ -59,6 +62,9 @@ export class UsersService {
       const user = this.usersRepository.create(createUserDto);
       const res = await this.usersRepository.save(user);
       delete res.password;
+      this.notificationsClient.emit('mail.send.welcome', {
+        email: user.email,
+      });
       return res;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);

@@ -187,9 +187,6 @@ export class AuthService {
         createdUser.roles,
       );
 
-      this.notificationsClient.emit('mail.send.welcome', {
-        email: createdUser.email,
-      });
       return {
         user: createdUser,
         credentials: { access_token, refresh_token },
