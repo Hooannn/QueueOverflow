@@ -1,10 +1,13 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.10",
+  "version": "0.0.17",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
-  "repository": "QueueOverflow",
+  "repository": "https://github.com/Hooannn/QueueOverflow",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./build/lib/index.d.ts",
@@ -44,7 +47,7 @@
     "clean": "rm -rf ./build",
     "test:types": "tsc",
     "build:types": "tsc --build",
-    "prepare": "npm run clean && npm run build:types",
+    "build": "npm run clean && npm run build:types",
     "publish:package": "npm publish --access=public"
   },
   "files": [

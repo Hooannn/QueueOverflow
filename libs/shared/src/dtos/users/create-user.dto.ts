@@ -28,4 +28,7 @@ export class CreateUserDto {
   @IsOptional()
   @ArrayMinSize(1)
   roles?: Role[];
+
+  @IsOptional()
+  meta_data?: any;
 }
