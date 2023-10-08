@@ -4,6 +4,7 @@ import { Logger } from 'nestjs-pino';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import config from './configs';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -19,6 +20,18 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const port = parseInt(config.PORT);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [config.RABBITMQ_URL],
+      queue: 'notifications_queue',
+      queueOptions: {
+        durable: false,
+      },
+    },
+  });
+  await app.startAllMicroservices();
   await app.listen(port);
 }
 bootstrap();

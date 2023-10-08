@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import config from 'src/configs';
 import { HttpModule } from '@nestjs/axios';
@@ -10,7 +9,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
-    UsersModule,
     RedisModule,
     JwtModule.register({
       global: false,
@@ -25,6 +23,19 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         options: {
           urls: [config.RABBITMQ_URL],
           queue: 'notifications_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
+    ClientsModule.register([
+      {
+        name: 'USERS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'users_queue',
           queueOptions: {
             durable: false,
           },

@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import config from './configs';
 
 async function bootstrap() {
@@ -20,6 +21,17 @@ async function bootstrap() {
 
   const port = parseInt(config.PORT);
 
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [config.RABBITMQ_URL],
+      queue: 'users_queue',
+      queueOptions: {
+        durable: false,
+      },
+    },
+  });
+  await app.startAllMicroservices();
   await app.listen(port);
 }
 bootstrap();

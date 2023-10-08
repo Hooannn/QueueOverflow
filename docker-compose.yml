@@ -13,6 +13,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - PORT=3000
+
   notifications:
     build:
       context: apps/notifications
@@ -25,3 +27,18 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=development
+      - PORT=3001
+
+  users:
+    build:
+      context: apps/users
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/users:/app
+      - /app/node_modules
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002

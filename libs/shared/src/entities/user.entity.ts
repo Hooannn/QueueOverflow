@@ -45,5 +45,5 @@ export class User extends DefaultEntity {
     type: "jsonb",
     nullable: true,
   })
-  meta_data: any;
+  meta_data?: any;
 }

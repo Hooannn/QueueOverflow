@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { UsersModule } from './users/users.module';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
@@ -9,6 +8,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GatewayController } from './gateway/gateway.controller';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -23,7 +24,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    UsersModule,
     LoggerModule.forRoot({
       pinoHttp: {
         transport:
@@ -39,8 +39,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       signOptions: { expiresIn: '60s' },
     }),
     RedisModule,
+    ClientsModule.register([
+      {
+        name: 'USERS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'users_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
-  controllers: [AppController],
+  controllers: [AppController, GatewayController],
   providers: [
     {
       provide: APP_GUARD,

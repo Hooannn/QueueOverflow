@@ -8,7 +8,7 @@ RUN yarn install
 
 COPY . .
 
-CMD ["npm", "run", "listen:dev"]
+CMD ["npm", "run", "dev"]
 
 
 FROM node:18-alpine AS production
@@ -23,4 +23,4 @@ COPY . .
 
 RUN yarn build
 
-CMD ["npm", "run", "listen"]
+CMD ["npm", "run", "start"]

@@ -1,21 +1,22 @@
 import {
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import Redis from 'ioredis';
 import { hashSync, compareSync } from 'bcrypt';
 import config from 'src/configs';
 import { HttpService } from '@nestjs/axios';
 import { ClientProxy } from '@nestjs/microservices';
-import { Role } from '@queueoverflow/shared/entities';
+import { Role, User } from '@queueoverflow/shared/entities';
 import { generatePassword } from '@queueoverflow/shared/utils';
 import { SignInDto, SignUpDto, RefreshDto } from '@queueoverflow/shared/dtos';
 import { randomUUID } from 'crypto';
+import { firstValueFrom } from 'rxjs';
 export interface JwtPayloads {
   userId: string;
   roles: [Role];
@@ -60,16 +61,18 @@ export interface GithubUser {
 export class AuthService {
   constructor(
     @Inject('REDIS') private readonly redisClient: Redis,
-    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
+    @Inject('USERS_SERVICE') private readonly usersClient: ClientProxy,
   ) {}
 
   async signIn(signInDto: SignInDto) {
     try {
-      const requestUser = await this.usersService.findPassword(signInDto.email);
+      const requestUser = await firstValueFrom<User>(
+        this.usersClient.send('user.find_password_by_email', signInDto.email),
+      );
       if (!requestUser)
         throw new HttpException(
           'Unregistered email address',
@@ -79,9 +82,12 @@ export class AuthService {
         signInDto.password?.toString(),
         requestUser.password?.toString(),
       );
-      const authenticatedUser = await this.usersService.findOne(requestUser.id);
-      if (!isPasswordMatched)
-        throw new UnauthorizedException('Invalid password');
+
+      const authenticatedUser = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_id', requestUser.id),
+      );
+
+      if (!isPasswordMatched) throw new ForbiddenException('Invalid password');
 
       const { access_token, refresh_token } = await this.getCredentials(
         authenticatedUser.id,
@@ -93,13 +99,15 @@ export class AuthService {
         credentials: { access_token, refresh_token },
       };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async signInWithRenewPassword(signInDto: SignInDto) {
     try {
-      const user = await this.usersService.findOneByEmail(signInDto.email);
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_email', signInDto.email),
+      );
       if (!user)
         throw new HttpException(
           'Unregistered email address',
@@ -110,8 +118,7 @@ export class AuthService {
       );
       const isPasswordMatched = generatedPassword === signInDto.password;
 
-      if (!isPasswordMatched)
-        throw new UnauthorizedException('Invalid password');
+      if (!isPasswordMatched) throw new ForbiddenException('Invalid password');
 
       const newHashedPassword = hashSync(
         generatedPassword,
@@ -123,17 +130,17 @@ export class AuthService {
         user.roles,
       );
 
-      this.usersService.update(
-        user.id,
-        {
+      this.usersClient.send('user.update', {
+        userId: user.id,
+        updateUserDto: {
           password: newHashedPassword,
         },
-        user.id,
-      );
+        updatedBy: user.id,
+      });
 
       return { user, credentials: { access_token, refresh_token } };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -150,13 +157,15 @@ export class AuthService {
         generatedPassword,
       );
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async signUp(signUpDto: SignUpDto) {
     try {
-      const user = await this.usersService.findOneByEmail(signUpDto.email);
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_email', signUpDto.email),
+      );
       if (user)
         throw new HttpException(
           'Registered email address',
@@ -167,20 +176,23 @@ export class AuthService {
       );
       const isPasswordMatched = generatedPassword === signUpDto.password;
 
-      if (!isPasswordMatched)
-        throw new UnauthorizedException(`Invalid password`);
+      if (!isPasswordMatched) throw new ForbiddenException(`Invalid password`);
 
       const hashedPassword = hashSync(
         signUpDto.password.toString(),
         parseInt(config.SALTED_PASSWORD),
       );
 
-      const createdUser = await this.usersService.create({
-        email: signUpDto.email,
-        password: hashedPassword,
-        first_name: '',
-        last_name: '',
-      });
+      const createdUser = await firstValueFrom<User>(
+        this.usersClient.send('user.create', {
+          createUserDto: {
+            email: signUpDto.email,
+            password: hashedPassword,
+            first_name: '',
+            last_name: '',
+          },
+        }),
+      );
 
       const { access_token, refresh_token } = await this.getCredentials(
         createdUser.id,
@@ -192,7 +204,7 @@ export class AuthService {
         credentials: { access_token, refresh_token },
       };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -210,14 +222,17 @@ export class AuthService {
       await this.jwtService.verifyAsync(legalToken ?? '', {
         secret: config.REFRESH_TOKEN_SECRET,
       });
-      const legalUser = await this.usersService.findOne(belongsTo);
+
+      const legalUser = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_id', belongsTo),
+      );
       const { access_token, refresh_token } = await this.getCredentials(
         legalUser.id,
         legalUser.roles,
       );
       return { credentials: { access_token, refresh_token } };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -225,8 +240,11 @@ export class AuthService {
     const googleUser = await this.getPublicGoogleUser(googleAccessToken);
     const { email_verified, family_name, given_name, email, picture } =
       googleUser;
-    if (!email_verified) throw new UnauthorizedException('Email not verified');
-    const user = await this.usersService.findOneByEmail(email);
+    if (!email_verified) throw new ForbiddenException('Email not verified');
+
+    const user = await firstValueFrom<User>(
+      this.usersClient.send('user.find_by_email', email),
+    );
     if (user) {
       const { access_token, refresh_token } = await this.getCredentials(
         user.id,
@@ -240,13 +258,17 @@ export class AuthService {
     const password = randomUUID();
     const hashedPassword = hashSync(password, parseInt(config.SALTED_PASSWORD));
 
-    const createdUser = await this.usersService.create({
-      email,
-      password: hashedPassword,
-      first_name: family_name,
-      last_name: given_name,
-      avatar: picture,
-    });
+    const createdUser = await firstValueFrom<User>(
+      this.usersClient.send('user.create', {
+        createUserDto: {
+          email,
+          password: hashedPassword,
+          first_name: family_name,
+          last_name: given_name,
+          avatar: picture,
+        },
+      }),
+    );
 
     const { access_token, refresh_token } = await this.getCredentials(
       createdUser.id,
@@ -273,7 +295,7 @@ export class AuthService {
       const githubCredentials = this.parsedGithubCredentials(data) as any;
 
       if (!githubCredentials.access_token) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new ForbiddenException('Invalid credentials');
       }
 
       const { data: githubUser } =
@@ -287,11 +309,13 @@ export class AuthService {
         );
 
       const existedEmailUser = githubUser.email
-        ? await this.usersService.findOneByEmail(githubUser.email)
+        ? await firstValueFrom<User>(
+            this.usersClient.send('user.find_by_email', githubUser.email),
+          )
         : null;
 
-      const existedGithubUidUser = await this.usersService.findOneByGithubUid(
-        githubUser.id,
+      const existedGithubUidUser = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_github_uid', githubUser.id),
       );
 
       if (
@@ -299,25 +323,36 @@ export class AuthService {
         existedGithubUidUser &&
         existedEmailUser.id !== existedGithubUidUser.id
       ) {
-        await this.usersService.remove(existedGithubUidUser.id);
-        const user = await this.usersService.update(existedEmailUser.id, {
-          first_name:
-            existedEmailUser.first_name != ''
-              ? existedEmailUser.first_name
-              : existedGithubUidUser.first_name ?? '',
-          last_name:
-            existedEmailUser.last_name != ''
-              ? existedEmailUser.last_name
-              : existedGithubUidUser.last_name ?? '',
-          avatar: existedEmailUser.avatar ?? existedGithubUidUser.avatar,
-          meta_data: {
-            github_uid: githubUser.id,
-          },
-        });
+        await firstValueFrom<string>(
+          this.usersClient.send('user.remove', existedGithubUidUser.id),
+        );
+
+        const user = await firstValueFrom<User>(
+          this.usersClient.send('user.update', {
+            userId: existedEmailUser.id,
+            updateUserDto: {
+              first_name:
+                existedEmailUser.first_name != ''
+                  ? existedEmailUser.first_name
+                  : existedGithubUidUser.first_name ?? '',
+              last_name:
+                existedEmailUser.last_name != ''
+                  ? existedEmailUser.last_name
+                  : existedGithubUidUser.last_name ?? '',
+              avatar: existedEmailUser.avatar ?? existedGithubUidUser.avatar,
+              meta_data: {
+                github_uid: githubUser.id,
+              },
+            },
+            updatedBy: existedEmailUser.id,
+          }),
+        );
+
         const { access_token, refresh_token } = await this.getCredentials(
           user.id,
           user.roles,
         );
+
         return {
           user,
           credentials: { access_token, refresh_token },
@@ -327,12 +362,19 @@ export class AuthService {
       if (existedEmailUser) {
         const shouldUpdate = !existedEmailUser.meta_data?.github_uid;
         const user = shouldUpdate
-          ? await this.usersService.update(existedEmailUser.id, {
-              meta_data: {
-                github_uid: githubUser.id,
-              },
-            })
+          ? await firstValueFrom<User>(
+              this.usersClient.send('user.update', {
+                userId: existedEmailUser.id,
+                updateUserDto: {
+                  meta_data: {
+                    github_uid: githubUser.id,
+                  },
+                },
+                updatedBy: existedEmailUser.id,
+              }),
+            )
           : existedEmailUser;
+
         const { access_token, refresh_token } = await this.getCredentials(
           user.id,
           user.roles,
@@ -346,10 +388,17 @@ export class AuthService {
       if (existedGithubUidUser) {
         const shouldUpdate = !existedGithubUidUser.email && githubUser.email;
         const user = shouldUpdate
-          ? await this.usersService.update(existedGithubUidUser.id, {
-              email: githubUser.email,
-            })
+          ? await firstValueFrom<User>(
+              this.usersClient.send('user.update', {
+                userId: existedGithubUidUser.id,
+                updateUserDto: {
+                  email: githubUser.email,
+                },
+                updatedBy: existedGithubUidUser.id,
+              }),
+            )
           : existedGithubUidUser;
+
         const { access_token, refresh_token } = await this.getCredentials(
           user.id,
           user.roles,
@@ -366,16 +415,21 @@ export class AuthService {
         parseInt(config.SALTED_PASSWORD),
       );
 
-      const createdUser = await this.usersService.create({
-        email: githubUser.email ?? '',
-        password: hashedPassword,
-        first_name: githubUser.name ?? githubUser.login,
-        last_name: '',
-        avatar: githubUser.avatar_url,
-        meta_data: {
-          github_uid: githubUser.id,
-        },
-      });
+      const createdUser = await firstValueFrom<User>(
+        this.usersClient.send('user.create', {
+          createUserDto: {
+            email: githubUser.email ?? '',
+            password: hashedPassword,
+            first_name: githubUser.name ?? githubUser.login,
+            last_name: '',
+            avatar: githubUser.avatar_url,
+            meta_data: {
+              github_uid: githubUser.id,
+              github_url: githubUser.html_url,
+            },
+          },
+        }),
+      );
 
       const { access_token, refresh_token } = await this.getCredentials(
         createdUser.id,
@@ -387,7 +441,7 @@ export class AuthService {
         credentials: { access_token, refresh_token },
       };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
 

@@ -1,13 +1,16 @@
 import { Controller } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { EventPattern } from '@nestjs/microservices';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @EventPattern('mail.send.password')
-  async sendPasswordEmail(params: { email: string; password: string }) {
+  async sendPasswordEmail(
+    @Payload() params: { email: string; password: string },
+    @Ctx() context: RmqContext,
+  ) {
     return this.notificationsService.sendGeneratedPasswordMail(
       params.email,
       params.password,
@@ -15,7 +18,10 @@ export class NotificationsController {
   }
 
   @EventPattern('mail.send.welcome')
-  async sendWelcomeEmail(params: { email: string }) {
+  async sendWelcomeEmail(
+    @Payload() params: { email: string },
+    @Ctx() context: RmqContext,
+  ) {
     return this.notificationsService.sendWelcomeEmail(params.email);
   }
 }

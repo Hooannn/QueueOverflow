@@ -6,11 +6,11 @@ import {
   Query,
   Post,
   Body,
+  Inject,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { isEmail } from 'class-validator';
 import { Public } from './auth.guard';
-import { UsersService } from 'src/users/users.service';
 import { User } from '@queueoverflow/shared/entities';
 import { Response } from '@queueoverflow/shared/utils';
 import {
@@ -20,32 +20,43 @@ import {
   RefreshDto,
   GithubAuthDto,
 } from '@queueoverflow/shared/dtos';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private usersService: UsersService,
+    @Inject('USERS_SERVICE') private readonly usersClient: ClientProxy,
   ) {}
 
   @Public()
   @Get()
   async checkUser(@Query() checkUserDto: CheckUserDto) {
-    const email = Buffer.from(checkUserDto.email, 'base64').toString('ascii');
-    if (!isEmail(email)) {
-      throw new HttpException('Invalid email address', HttpStatus.BAD_REQUEST);
-    }
-    const user = await this.usersService.checkUser({ email });
-    if (!user) {
-      throw new HttpException(
-        'Unregistered email address',
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    try {
+      const email = Buffer.from(checkUserDto.email, 'base64').toString('ascii');
+      if (!isEmail(email)) {
+        throw new HttpException(
+          'Invalid email address',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const user = await firstValueFrom<
+        Pick<User, 'first_name' | 'last_name' | 'id' | 'email'>
+      >(this.usersClient.send('user.check', email));
+      if (!user) {
+        throw new HttpException(
+          'Unregistered email address',
+          HttpStatus.FORBIDDEN,
+        );
+      }
 
-    return new Response<
-      Pick<User, 'first_name' | 'last_name' | 'id' | 'email'>
-    >({ code: 200, success: true, data: user, message: 'Available user' });
+      return new Response<
+        Pick<User, 'first_name' | 'last_name' | 'id' | 'email'>
+      >({ code: 200, success: true, data: user, message: 'Available user' });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Public()
