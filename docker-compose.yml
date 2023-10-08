@@ -42,3 +42,31 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3002
+
+  cms:
+    build:
+      context: apps/cms
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/cms:/app
+      - /app/node_modules
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+
+  posts:
+    build:
+      context: apps/posts
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/posts:/app
+      - /app/node_modules
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004

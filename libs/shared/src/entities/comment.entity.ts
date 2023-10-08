@@ -4,15 +4,10 @@ import { Entity, Column } from "typeorm";
 @Entity("comments")
 export class Comment extends DefaultEntity {
   @Column({
-    length: 50,
-  })
-  title: string;
-
-  @Column({
     type: "text",
     nullable: true,
   })
-  description?: string;
+  content?: string;
 
   @Column({
     type: "boolean",

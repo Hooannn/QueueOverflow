@@ -29,15 +29,15 @@ import config from 'src/configs';
 
 @Controller({
   version: '1',
-  path: 'v1',
+  path: 'v1/users',
 })
-export class GatewayController {
+export class UsersGatewayController {
   constructor(
     @Inject('USERS_SERVICE')
     private readonly usersClient: ClientProxy,
   ) {}
 
-  @Post('/users')
+  @Post()
   @Roles(Role.Admin)
   async create(@Req() req, @Body() createUserDto: CreateUserDto) {
     try {
@@ -64,7 +64,7 @@ export class GatewayController {
     }
   }
 
-  @Get('/users')
+  @Get()
   @Roles(Role.Admin)
   async findAll(@Query() query: QueryDto) {
     try {
@@ -85,7 +85,7 @@ export class GatewayController {
     }
   }
 
-  @Get('users/profile')
+  @Get('profile')
   async findAuthenticatedUser(@Request() req) {
     try {
       const authUser = req.auth;
@@ -105,7 +105,7 @@ export class GatewayController {
     }
   }
 
-  @Patch('users/profile')
+  @Patch('profile')
   async updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
     try {
       const authUser = req.auth;
@@ -133,7 +133,7 @@ export class GatewayController {
     }
   }
 
-  @Patch('users/profile/password')
+  @Patch('profile/password')
   async changePassword(
     @Request() req,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -162,7 +162,7 @@ export class GatewayController {
     }
   }
 
-  @Get('users/:id')
+  @Get(':id')
   @Roles(Role.Admin)
   async findOne(@Param('id') id: string) {
     try {
@@ -179,7 +179,7 @@ export class GatewayController {
     }
   }
 
-  @Patch('users/:id')
+  @Patch(':id')
   @Roles(Role.Admin)
   async update(
     @Req() req,
@@ -213,7 +213,7 @@ export class GatewayController {
     }
   }
 
-  @Delete('users/:id')
+  @Delete(':id')
   @Roles(Role.Admin)
   async remove(@Param('id') id: string) {
     try {
@@ -221,7 +221,7 @@ export class GatewayController {
         this.usersClient.send('user.remove', id),
       );
 
-      return new Response<any>({
+      return new Response<{ id: string }>({
         code: 200,
         success: true,
         data: { id: removedId },

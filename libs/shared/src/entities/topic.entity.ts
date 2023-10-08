@@ -16,8 +16,9 @@ export class Topic extends DefaultEntity {
 
   @Column({
     type: "boolean",
+    default: false,
   })
-  public: boolean;
+  publish: boolean;
 
   @Column({
     type: "jsonb",

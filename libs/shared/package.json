@@ -1,13 +1,10 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.17",
+  "version": "0.0.23",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
   "repository": "https://github.com/Hooannn/QueueOverflow",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "exports": {
     ".": {
       "types": "./build/lib/index.d.ts",

@@ -8,8 +8,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GatewayController } from './gateway/gateway.controller';
+import { UsersGatewayController } from './gateway/user.gateway.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { CmsGatewayController } from './gateway/cms.gateway.controller';
+import { PostsGatewayController } from './gateway/posts.gateway.controller';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -52,8 +54,39 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'CMS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'cms_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
+    ClientsModule.register([
+      {
+        name: 'POSTS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'posts_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
-  controllers: [AppController, GatewayController],
+  controllers: [
+    AppController,
+    UsersGatewayController,
+    CmsGatewayController,
+    PostsGatewayController,
+  ],
   providers: [
     {
       provide: APP_GUARD,

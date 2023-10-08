@@ -3,12 +3,14 @@ import {
   Generated,
   CreateDateColumn,
   UpdateDateColumn,
+  Column,
 } from "typeorm";
 
 export class DefaultEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column()
   @Generated("increment")
   idx: number;
 
