@@ -1,5 +1,13 @@
-import { DefaultEntity } from ".";
-import { Entity, Column } from "typeorm";
+import { BaseEntity } from "./";
+import {
+  Entity,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  Generated,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 export enum Role {
   User = "user",
@@ -7,7 +15,20 @@ export enum Role {
 }
 
 @Entity("users")
-export class User extends DefaultEntity {
+export class User {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Generated("increment")
+  @Column()
+  idx: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
   @Column({
     length: 50,
     nullable: true,

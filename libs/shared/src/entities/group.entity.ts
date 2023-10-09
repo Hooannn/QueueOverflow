@@ -1,8 +1,8 @@
-import { DefaultEntity } from ".";
+import { BaseEntity } from ".";
 import { Entity, Column } from "typeorm";
 
 @Entity("groups")
-export class Group extends DefaultEntity {
+export class Group extends BaseEntity {
   @Column({
     length: 50,
   })
@@ -16,6 +16,7 @@ export class Group extends DefaultEntity {
 
   @Column({
     type: "boolean",
+    default: false,
   })
   public: boolean;
 

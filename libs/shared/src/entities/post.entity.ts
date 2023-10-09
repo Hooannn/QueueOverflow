@@ -1,9 +1,9 @@
-import { DefaultEntity } from ".";
+import { BaseEntity } from ".";
 import { Entity, Column, ManyToMany, RelationId, JoinTable } from "typeorm";
 import { Topic } from "./topic.entity";
 
 @Entity("posts")
-export class Post extends DefaultEntity {
+export class Post extends BaseEntity {
   @Column({
     length: 50,
   })
@@ -30,6 +30,7 @@ export class Post extends DefaultEntity {
 
   @Column({
     type: "boolean",
+    default: false,
   })
   publish: boolean;
 

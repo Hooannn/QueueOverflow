@@ -7,25 +7,12 @@ import config from './configs';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersGatewayController } from './gateway/user.gateway.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { CmsGatewayController } from './gateway/cms.gateway.controller';
 import { PostsGatewayController } from './gateway/posts.gateway.controller';
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: config.PGHOST,
-      database: config.PGDATABASE,
-      username: config.PGUSER,
-      password: config.PGPASSWORD,
-      logging: config.NODE_ENV !== 'production',
-      port: 5432,
-      ssl: true,
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
     LoggerModule.forRoot({
       pinoHttp: {
         transport:

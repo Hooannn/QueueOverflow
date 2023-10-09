@@ -1,8 +1,8 @@
-import { DefaultEntity } from ".";
+import { BaseEntity } from ".";
 import { Entity, Column } from "typeorm";
 
 @Entity("subscriptions")
-export class Subscription extends DefaultEntity {
+export class Subscription extends BaseEntity {
   @Column()
   uid: string;
 

@@ -1,8 +1,8 @@
-import { DefaultEntity } from ".";
+import { BaseEntity } from ".";
 import { Entity, Column } from "typeorm";
 
 @Entity("topics")
-export class Topic extends DefaultEntity {
+export class Topic extends BaseEntity {
   @Column({
     length: 50,
   })

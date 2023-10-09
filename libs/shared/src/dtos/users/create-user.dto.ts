@@ -5,7 +5,7 @@ import {
   ArrayMinSize,
   IsOptional,
 } from "class-validator";
-import { Role } from "../../entities";
+import { Role } from "../../entities/user.entity";
 
 export class CreateUserDto {
   @IsString()

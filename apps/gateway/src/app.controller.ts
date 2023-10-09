@@ -20,9 +20,9 @@ export class AppController {
     if (config.NODE_ENV === 'production') {
       throw new ForbiddenException();
     }
-    return await this.authService.getCredentials(randomUUID(), [
-      Role.Admin,
-      Role.User,
-    ]);
+    return await this.authService.getCredentials(
+      '2660b497-eb2c-4b47-b46e-238ddf7bf80e',
+      [Role.Admin, Role.User],
+    );
   }
 }

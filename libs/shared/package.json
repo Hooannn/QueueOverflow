@@ -1,16 +1,11 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.23",
+  "version": "0.0.45",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
   "repository": "https://github.com/Hooannn/QueueOverflow",
   "exports": {
-    ".": {
-      "types": "./build/lib/index.d.ts",
-      "import": "./build/lib/index.mjs",
-      "default": "./build/lib/index.js"
-    },
     "./dtos": {
       "types": "./build/lib/dtos/index.d.ts",
       "import": "./build/lib/dtos/index.mjs",
@@ -45,6 +40,7 @@
     "test:types": "tsc",
     "build:types": "tsc --build",
     "build": "npm run clean && npm run build:types",
+    "prepare:version": "npm version patch",
     "publish:package": "npm publish --access=public"
   },
   "files": [

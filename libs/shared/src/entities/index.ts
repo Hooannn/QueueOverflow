@@ -1,4 +1,4 @@
-export * from "./default.entity";
+export * from "./base.entity";
 export * from "./user.entity";
 export * from "./comment.entity";
 export * from "./follow.entity";

@@ -1,8 +1,8 @@
-import { DefaultEntity } from ".";
+import { BaseEntity } from ".";
 import { Entity, Column } from "typeorm";
 
 @Entity("comments")
-export class Comment extends DefaultEntity {
+export class Comment extends BaseEntity {
   @Column({
     type: "text",
     nullable: true,
@@ -11,6 +11,7 @@ export class Comment extends DefaultEntity {
 
   @Column({
     type: "boolean",
+    default: false,
   })
   public: boolean;
 

@@ -5,6 +5,7 @@ import config from './configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from './redis/redis.module';
 import { TopicsModule } from './topics/topics.module';
+import { User } from '@queueoverflow/shared/entities';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -16,6 +17,7 @@ import { TopicsModule } from './topics/topics.module';
       logging: config.NODE_ENV !== 'production',
       port: 5432,
       ssl: true,
+      entities: [User],
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -28,7 +30,7 @@ import { TopicsModule } from './topics/topics.module';
       },
     }),
     RedisModule,
-    TopicsModule
+    TopicsModule,
   ],
   controllers: [AppController],
 })

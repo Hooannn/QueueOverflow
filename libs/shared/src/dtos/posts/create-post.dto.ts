@@ -24,8 +24,9 @@ export class CreatePostDto {
   @IsNumber()
   downvotes?: number;
 
+  @IsOptional()
   @IsBoolean()
-  publish: boolean;
+  publish?: boolean;
 
   @IsArray()
   @IsOptional()

@@ -15,10 +15,20 @@ export class TopicsService {
     private readonly topicsRepository: Repository<Topic>,
   ) {}
 
-  private findOptionsSelect: FindOptionsSelect<Topic> = {};
+  private findOptionsSelect: FindOptionsSelect<Topic> = {
+    creator: {
+      first_name: true,
+      last_name: true,
+      avatar: true,
+      id: true,
+    },
+  };
 
   async create(createTopicDto: CreateTopicDto, createdBy?: string) {
-    const topic = this.topicsRepository.create(createTopicDto);
+    const topic = this.topicsRepository.create({
+      ...createTopicDto,
+      created_by: createdBy,
+    });
     const res = await this.topicsRepository.save(topic);
     return res;
   }
@@ -29,6 +39,10 @@ export class TopicsService {
         select: this.findOptionsSelect,
         skip: query.offset,
         take: query.limit,
+        relations: query.relations ?? [],
+        order: {
+          updated_at: -1,
+        },
       }),
 
       this.topicsRepository.count({ select: { id: true } }),
