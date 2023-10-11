@@ -41,7 +41,9 @@ const updatePackageVersion = (packagePath, packageName, newVersion) => {
       `Updated version of ${packageName} in ${packageFilePath} to ${newVersion}`
     );
   } catch (err) {
-    console.error(`Error updating ${packageFilePath}: ${err}`);
+    console.error(
+      `Error updating ${packageName} in ${packageFilePath}: ${err}`
+    );
   }
 };
 

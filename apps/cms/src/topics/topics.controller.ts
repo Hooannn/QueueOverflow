@@ -22,9 +22,10 @@ export class TopicsController {
 
       return topic;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -36,9 +37,10 @@ export class TopicsController {
 
       return { data, total };
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -49,9 +51,10 @@ export class TopicsController {
       const topic = await this.topicsService.findOne(id);
       return topic;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -74,9 +77,10 @@ export class TopicsController {
 
       return updatedRecord;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -87,9 +91,10 @@ export class TopicsController {
       await this.topicsService.remove(params.id, params.removedBy);
       return params.id;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }

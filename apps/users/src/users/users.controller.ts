@@ -26,9 +26,10 @@ export class UsersController {
 
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -45,9 +46,10 @@ export class UsersController {
 
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -59,9 +61,10 @@ export class UsersController {
 
       return { data, total };
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -78,9 +81,10 @@ export class UsersController {
 
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -91,9 +95,10 @@ export class UsersController {
       const user = await this.usersService.findOne(id);
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -104,9 +109,10 @@ export class UsersController {
       const user = await this.usersService.findPassword(email);
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -117,9 +123,10 @@ export class UsersController {
       const user = await this.usersService.findOneByEmail(email);
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -130,9 +137,10 @@ export class UsersController {
       const user = await this.usersService.findOneByGithubUid(githubUid);
       return user;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -155,9 +163,10 @@ export class UsersController {
 
       return updatedRecord;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -168,9 +177,10 @@ export class UsersController {
       await this.usersService.remove(id);
       return id;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }
@@ -178,12 +188,51 @@ export class UsersController {
   @MessagePattern('user.follow')
   async followUser(@Payload() params: { from: string; to: string }) {
     try {
-      console.log(params);
-      return 'ok';
+      const res = await this.usersService.followUser(params.from, params.to);
+      return res;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
-        message: error.message || 'Invalid request',
-        status: error.status || HttpStatus.BAD_REQUEST,
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @MessagePattern('user.find_followers')
+  async findAllFollowers(
+    @Payload() params: { userId: string; queryDto: QueryDto },
+  ) {
+    try {
+      const res = await this.usersService.findAllFollowers(
+        params.userId,
+        params.queryDto,
+      );
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @MessagePattern('user.find_following')
+  async findAllFollowing(
+    @Payload() params: { userId: string; queryDto: QueryDto },
+  ) {
+    try {
+      const res = await this.usersService.findAllFollowing(
+        params.userId,
+        params.queryDto,
+      );
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
       });
     }
   }

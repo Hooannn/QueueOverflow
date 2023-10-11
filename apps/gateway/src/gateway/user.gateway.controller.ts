@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
   Query,
@@ -20,7 +21,7 @@ import {
   UpdateUserDto,
   ChangePasswordDto,
 } from '@queueoverflow/shared/dtos';
-import { Role, User } from '@queueoverflow/shared/entities';
+import { Follow, Role, User } from '@queueoverflow/shared/entities';
 import { hashSync } from 'bcrypt';
 import { firstValueFrom } from 'rxjs';
 import { Roles } from 'src/auth/auth.roles';
@@ -66,12 +67,12 @@ export class UsersGatewayController {
 
   @Get()
   @Roles(Role.Admin)
-  async findAll(@Query() query: QueryDto) {
+  async findAll(@Query() queryDto: QueryDto) {
     try {
       const { data, total } = await firstValueFrom<{
         data: User[];
         total?: number;
-      }>(this.usersClient.send('user.find_all', query));
+      }>(this.usersClient.send('user.find_all', queryDto));
 
       return new Response<User[]>({
         code: 200,
@@ -233,20 +234,73 @@ export class UsersGatewayController {
   }
 
   @Post('follow/:id')
-  @Roles(Role.Admin)
   async followUser(@Param('id') id: string, @Req() req) {
     try {
-      await firstValueFrom(
+      if (req.auth?.userId == id)
+        throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+
+      const res = await firstValueFrom<Follow>(
         this.usersClient.send('user.follow', {
           from: req.auth?.userId,
           to: id,
         }),
       );
 
-      return new Response<any>({
+      return new Response<Follow>({
         code: 200,
         success: true,
+        data: res,
         message: 'Success',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('follow/followers')
+  async findAllFollowers(@Req() req, @Query() queryDto: QueryDto) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: Follow[];
+        total: number;
+      }>(
+        this.usersClient.send('user.find_followers', {
+          userId: req.auth?.userId,
+          queryDto,
+        }),
+      );
+
+      return new Response<Follow[]>({
+        code: 200,
+        success: true,
+        data,
+        total,
+        took: data.length,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('follow/following')
+  async findAllFollowing(@Req() req, @Query() queryDto: QueryDto) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: Follow[];
+        total: number;
+      }>(
+        this.usersClient.send('user.find_following', {
+          userId: req.auth?.userId,
+          queryDto,
+        }),
+      );
+
+      return new Response<Follow[]>({
+        code: 200,
+        success: true,
+        data,
+        total,
+        took: data.length,
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

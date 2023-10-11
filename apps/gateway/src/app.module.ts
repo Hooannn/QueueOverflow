@@ -40,8 +40,6 @@ import { PostsGatewayController } from './gateway/posts.gateway.controller';
           },
         },
       },
-    ]),
-    ClientsModule.register([
       {
         name: 'CMS_SERVICE',
         transport: Transport.RMQ,
@@ -53,8 +51,6 @@ import { PostsGatewayController } from './gateway/posts.gateway.controller';
           },
         },
       },
-    ]),
-    ClientsModule.register([
       {
         name: 'POSTS_SERVICE',
         transport: Transport.RMQ,

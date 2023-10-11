@@ -1,10 +1,4 @@
-import {
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { compareSync, hashSync } from 'bcrypt';
 import config from 'src/configs';
 import Redis from 'ioredis';
@@ -16,7 +10,7 @@ import {
   ChangePasswordDto,
   UpdateUserDto,
 } from '@queueoverflow/shared/dtos';
-import { User } from '@queueoverflow/shared/entities';
+import { Follow, User } from '@queueoverflow/shared/entities';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 @Injectable()
@@ -24,6 +18,8 @@ export class UsersService {
   constructor(
     @Inject('REDIS') private readonly redisClient: Redis,
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @InjectRepository(Follow)
+    private readonly followsRepository: Repository<Follow>,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
   ) {}
@@ -63,15 +59,75 @@ export class UsersService {
     return res;
   }
 
-  async findAll(query: QueryDto) {
+  async findAll(queryDto: QueryDto) {
     const [data, total] = await Promise.all([
       this.usersRepository.find({
         select: this.findOptionsSelect,
-        skip: query.offset,
-        take: query.limit,
+        skip: queryDto.offset,
+        take: queryDto.limit,
       }),
 
       this.usersRepository.count({ select: { id: true } }),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
+
+  async findAllFollowers(userId: string, queryDto: QueryDto) {
+    const [data, total] = await Promise.all([
+      this.followsRepository.find({
+        skip: queryDto.offset,
+        take: queryDto.limit,
+        where: {
+          to_uid: userId,
+        },
+        relations: {
+          from_user: true,
+        },
+        select: {
+          from_user: { ...this.findOptionsSelect, roles: false },
+        },
+      }),
+
+      this.followsRepository.count({
+        select: { to_uid: true },
+        where: {
+          to_uid: userId,
+        },
+      }),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
+
+  async findAllFollowing(userId: string, queryDto: QueryDto) {
+    const [data, total] = await Promise.all([
+      this.followsRepository.find({
+        skip: queryDto.offset,
+        take: queryDto.limit,
+        relations: {
+          to_user: true,
+        },
+        where: {
+          from_uid: userId,
+        },
+        select: {
+          to_user: { ...this.findOptionsSelect, roles: false },
+        },
+      }),
+
+      this.followsRepository.count({
+        select: { from_uid: true },
+        where: {
+          from_uid: userId,
+        },
+      }),
     ]);
 
     return {
@@ -181,6 +237,22 @@ export class UsersService {
 
   async remove(id: string) {
     const res = await this.usersRepository.delete(id);
+    return res;
+  }
+
+  async followUser(from_uid: string, to_uid: string) {
+    const isExisted = await this.followsRepository.findOne({
+      where: { from_uid, to_uid },
+    });
+
+    if (isExisted)
+      throw new RpcException({
+        message: 'Bad request',
+        status: HttpStatus.CONFLICT,
+      });
+
+    const newFollow = this.followsRepository.create({ from_uid, to_uid });
+    const res = await this.followsRepository.save(newFollow);
     return res;
   }
 }
