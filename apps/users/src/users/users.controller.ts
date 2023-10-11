@@ -174,4 +174,17 @@ export class UsersController {
       });
     }
   }
+
+  @MessagePattern('user.follow')
+  async followUser(@Payload() params: { from: string; to: string }) {
+    try {
+      console.log(params);
+      return 'ok';
+    } catch (error) {
+      throw new RpcException({
+        message: error.message || 'Invalid request',
+        status: error.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
 }

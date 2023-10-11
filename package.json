@@ -6,7 +6,8 @@
     "build:app": "docker-compose up --build",
     "start:app": "docker-compose up",
     "down:app": "docker-compose down",
-    "release:shared": "cd libs/shared && yarn install && yarn build && npm version patch && yarn publish:package"
+    "release:shared": "cd libs/shared && yarn install && yarn build && npm version patch && yarn publish:package",
+    "update:package": "node ./scripts/update-package"
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/Hooannn/QueueOverflow/issues"
   },
-  "homepage": "https://github.com/Hooannn/QueueOverflow#readme"
+  "homepage": "https://github.com/Hooannn/QueueOverflow#readme",
+  "devDependencies": {
+    "commander": "^11.0.0",
+    "inquirer": "^8.0.0"
+  }
 }

@@ -1,4 +1,4 @@
-import { IsArray, IsNumberString, IsOptional } from "class-validator";
+import { IsArray, IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class QueryDto {
   @IsOptional()
@@ -8,8 +8,4 @@ export class QueryDto {
   @IsOptional()
   @IsNumberString()
   limit?: number;
-
-  @IsOptional()
-  @IsArray()
-  relations?: string[];
 }

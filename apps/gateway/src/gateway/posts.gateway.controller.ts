@@ -10,6 +10,8 @@ import {
   Req,
   Get,
   Post,
+  ParseArrayPipe,
+  Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -17,9 +19,8 @@ import {
   QueryDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
-import { Role, Post as QPost } from '@queueoverflow/shared/entities';
+import { Post as QPost } from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
-import { Roles } from 'src/auth/auth.roles';
 import { Response } from '@queueoverflow/shared/utils';
 
 @Controller({
@@ -80,12 +81,16 @@ export class PostsGatewayController {
   }
 
   @Get()
-  async findAllPosts(@Query() queryDto: QueryDto) {
+  async findAllPosts(
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
     try {
       const { data, total } = await firstValueFrom<{
         data: QPost[];
         total?: number;
-      }>(this.postsClient.send('post.find_all', queryDto));
+      }>(this.postsClient.send('post.find_all', { ...queryDto, relations }));
 
       return new Response<QPost[]>({
         code: 200,
@@ -110,6 +115,27 @@ export class PostsGatewayController {
         code: 200,
         success: true,
         data: post,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Req() req) {
+    try {
+      const removedId = await firstValueFrom<string>(
+        this.postsClient.send('post.remove', {
+          id,
+          removedBy: req.auth?.userId,
+        }),
+      );
+
+      return new Response<{ id: string }>({
+        code: 200,
+        success: true,
+        data: { id: removedId },
+        message: 'Deleted',
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

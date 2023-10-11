@@ -11,6 +11,7 @@ import {
   Req,
   Get,
   Delete,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -84,12 +85,16 @@ export class CmsGatewayController {
 
   @Get('/topics')
   @Roles(Role.Admin)
-  async findAllTopics(@Query() queryDto: QueryDto) {
+  async findAllTopics(
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
     try {
       const { data, total } = await firstValueFrom<{
         data: Topic[];
         total?: number;
-      }>(this.cmsClient.send('topic.find_all', queryDto));
+      }>(this.cmsClient.send('topic.find_all', { ...queryDto, relations }));
 
       return new Response<Topic[]>({
         code: 200,
@@ -123,10 +128,13 @@ export class CmsGatewayController {
 
   @Delete('/topics/:id')
   @Roles(Role.Admin)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Req() req) {
     try {
       const removedId = await firstValueFrom<string>(
-        this.cmsClient.send('topic.remove', id),
+        this.cmsClient.send('topic.remove', {
+          id,
+          removedBy: req.auth?.userId,
+        }),
       );
 
       return new Response<{ id: string }>({

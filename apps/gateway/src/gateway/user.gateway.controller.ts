@@ -231,4 +231,25 @@ export class UsersGatewayController {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
     }
   }
+
+  @Post('follow/:id')
+  @Roles(Role.Admin)
+  async followUser(@Param('id') id: string, @Req() req) {
+    try {
+      await firstValueFrom(
+        this.usersClient.send('user.follow', {
+          from: req.auth?.userId,
+          to: id,
+        }),
+      );
+
+      return new Response<any>({
+        code: 200,
+        success: true,
+        message: 'Success',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
 }

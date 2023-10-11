@@ -65,13 +65,19 @@ export class TopicsService {
   }
 
   async update(id: string, updateTopicDto: UpdateTopicDto, updatedBy?: string) {
-    await this.topicsRepository.update(id, updateTopicDto);
+    await this.topicsRepository.update(
+      { id, created_by: updatedBy },
+      updateTopicDto,
+    );
 
     return await this.findOne(id);
   }
 
-  async remove(id: string) {
-    const res = await this.topicsRepository.delete(id);
+  async remove(id: string, removedBy?: string) {
+    const res = await this.topicsRepository.delete({
+      id,
+      created_by: removedBy,
+    });
     return res;
   }
 }

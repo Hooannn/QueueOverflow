@@ -45,7 +45,6 @@ export class PostsService {
   }
 
   async findAll(query: QueryPostDto) {
-    console.log(query.relations);
     const findOptions: FindManyOptions<Post> = {
       select: this.findOptionsSelect,
       skip: query.offset,
@@ -88,13 +87,22 @@ export class PostsService {
   }
 
   async update(id: string, updatePostDto: UpdatePostDto, updatedBy?: string) {
-    await this.postsRepository.update(id, updatePostDto);
+    await this.postsRepository.update(
+      {
+        id,
+        created_by: updatedBy,
+      },
+      updatePostDto,
+    );
 
     return await this.findOne(id);
   }
 
   async remove(id: string, removedBy?: string) {
-    const res = await this.postsRepository.delete(id);
+    const res = await this.postsRepository.delete({
+      id,
+      created_by: removedBy,
+    });
     return res;
   }
 }

@@ -1,11 +1,48 @@
-import { BaseEntity } from ".";
-import { Entity, Column } from "typeorm";
+import { BaseEntity, User } from ".";
+import {
+  Entity,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  PrimaryColumn,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
 
 @Entity("follows")
-export class Follow extends BaseEntity {
-  @Column()
+export class Follow {
+  @Index()
+  @PrimaryColumn({
+    type: "uuid",
+  })
   from_uid: string;
 
-  @Column()
+  @Index()
+  @PrimaryColumn({
+    type: "uuid",
+  })
   to_uid: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({
+    name: "from_uid",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_from_user_id",
+  })
+  from_user: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({
+    name: "to_uid",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_to_user_id",
+  })
+  to_user: User;
 }

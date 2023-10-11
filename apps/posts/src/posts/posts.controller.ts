@@ -61,14 +61,14 @@ export class PostsController {
   async update(
     @Payload()
     params: {
-      userId: string;
+      postId: string;
       updatePostDto: UpdatePostDto;
       updatedBy: string;
     },
   ) {
     try {
       const updatedRecord = await this.postsService.update(
-        params.userId,
+        params.postId,
         params.updatePostDto,
         params.updatedBy,
       );
@@ -83,10 +83,16 @@ export class PostsController {
   }
 
   @MessagePattern('post.remove')
-  async remove(@Payload() id: string) {
+  async remove(
+    @Payload()
+    params: {
+      id: string;
+      removedBy: string;
+    },
+  ) {
     try {
-      await this.postsService.remove(id);
-      return id;
+      await this.postsService.remove(params.id, params.removedBy);
+      return params.id;
     } catch (error) {
       throw new RpcException({
         message: error.message || 'Invalid request',
