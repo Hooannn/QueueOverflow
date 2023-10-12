@@ -9,7 +9,6 @@ import {
 import { Post } from '@queueoverflow/shared/entities';
 import {
   CreatePostDto,
-  QueryDto,
   QueryPostDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
@@ -49,7 +48,7 @@ export class PostsService {
       select: this.findOptionsSelect,
       skip: query.offset,
       take: query.limit,
-      relations: query.relations ?? [],
+      relations: (query as any).relations ?? [],
       order: {
         updated_at: -1,
       },
@@ -81,6 +80,10 @@ export class PostsService {
       select: this.findOptionsSelect,
       where: {
         id,
+      },
+      relations: {
+        topics: true,
+        creator: true,
       },
     });
     return res;

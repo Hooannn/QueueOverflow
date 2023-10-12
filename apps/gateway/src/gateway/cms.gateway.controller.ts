@@ -12,14 +12,22 @@ import {
   Get,
   Delete,
   ParseArrayPipe,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   CreateTopicDto,
+  CreateUserDto,
   QueryDto,
   UpdateTopicDto,
 } from '@queueoverflow/shared/dtos';
-import { Role, Topic } from '@queueoverflow/shared/entities';
+import {
+  Follow,
+  Role,
+  Subscription,
+  Topic,
+  User,
+} from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
 import { Roles } from 'src/auth/auth.roles';
 import { Response } from '@queueoverflow/shared/utils';
@@ -32,6 +40,10 @@ export class CmsGatewayController {
   constructor(
     @Inject('CMS_SERVICE')
     private readonly cmsClient: ClientProxy,
+    @Inject('POSTS_SERVICE')
+    private readonly postsClient: ClientProxy,
+    @Inject('USERS_SERVICE')
+    private readonly usersClient: ClientProxy,
   ) {}
 
   @Post('/topics')
@@ -142,6 +154,75 @@ export class CmsGatewayController {
         success: true,
         data: { id: removedId },
         message: 'Deleted',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('/subscriptions')
+  @Roles(Role.Admin)
+  async createSubscription(
+    @Body('uid') uid: string,
+    @Body('topic_id') topic_id: string,
+  ) {
+    try {
+      const subscription = await firstValueFrom<Subscription>(
+        this.postsClient.send('subscription.topic.create', {
+          userId: uid,
+          topicId: topic_id,
+        }),
+      );
+
+      return new Response<Subscription>({
+        code: 201,
+        success: true,
+        message: 'Created',
+        data: subscription,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('/follows')
+  @Roles(Role.Admin)
+  async createFollow(
+    @Body('from_uid') from_uid: string,
+    @Body('to_uid') to_uid: string,
+  ) {
+    try {
+      const follow = await firstValueFrom<Follow>(
+        this.usersClient.send('user.follow', {
+          from: from_uid,
+          to: to_uid,
+        }),
+      );
+
+      return new Response<Follow>({
+        code: 201,
+        success: true,
+        message: 'Created',
+        data: follow,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('/users')
+  @Roles(Role.Admin)
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    try {
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.create', { createUserDto }),
+      );
+
+      return new Response<User>({
+        code: 201,
+        success: true,
+        message: 'Created',
+        data: user,
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

@@ -188,6 +188,11 @@ export class UsersController {
   @MessagePattern('user.follow')
   async followUser(@Payload() params: { from: string; to: string }) {
     try {
+      if (params.from === params.to)
+        throw new RpcException({
+          message: 'Bad request',
+          status: HttpStatus.CONFLICT,
+        });
       const res = await this.usersService.followUser(params.from, params.to);
       return res;
     } catch (error) {

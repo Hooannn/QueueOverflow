@@ -37,9 +37,9 @@ export class TopicsService {
     const [data, total] = await Promise.all([
       this.topicsRepository.find({
         select: this.findOptionsSelect,
-        skip: query.offset,
-        take: query.limit,
-        relations: query.relations ?? [],
+        skip: query?.offset,
+        take: query?.limit,
+        relations: (query as any)?.relations ?? [],
         order: {
           updated_at: -1,
         },

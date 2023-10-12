@@ -27,7 +27,6 @@ const fetchPackageVersion = (packageName) =>
 
 const updatePackageVersion = (packagePath, packageName, newVersion) => {
   const packageFilePath = path.join(packagePath, "package.json");
-  console.log(packageFilePath);
   try {
     const packageJson = JSON.parse(fs.readFileSync(packageFilePath, "utf8"));
     if (packageJson.dependencies[packageName]) {

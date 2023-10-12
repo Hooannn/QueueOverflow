@@ -178,16 +178,11 @@ export class AuthService {
 
       if (!isPasswordMatched) throw new ForbiddenException(`Invalid password`);
 
-      const hashedPassword = hashSync(
-        signUpDto.password.toString(),
-        parseInt(config.SALTED_PASSWORD),
-      );
-
       const createdUser = await firstValueFrom<User>(
         this.usersClient.send('user.create', {
           createUserDto: {
             email: signUpDto.email,
-            password: hashedPassword,
+            password: signUpDto.password,
             first_name: '',
             last_name: '',
           },
@@ -256,13 +251,12 @@ export class AuthService {
       };
     }
     const password = randomUUID();
-    const hashedPassword = hashSync(password, parseInt(config.SALTED_PASSWORD));
 
     const createdUser = await firstValueFrom<User>(
       this.usersClient.send('user.create', {
         createUserDto: {
           email,
-          password: hashedPassword,
+          password,
           first_name: family_name,
           last_name: given_name,
           avatar: picture,
@@ -410,16 +404,11 @@ export class AuthService {
       }
 
       const password = randomUUID();
-      const hashedPassword = hashSync(
-        password,
-        parseInt(config.SALTED_PASSWORD),
-      );
-
       const createdUser = await firstValueFrom<User>(
         this.usersClient.send('user.create', {
           createUserDto: {
             email: githubUser.email ?? '',
-            password: hashedPassword,
+            password: password,
             first_name: githubUser.name ?? githubUser.login,
             last_name: '',
             avatar: githubUser.avatar_url,

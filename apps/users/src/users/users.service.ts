@@ -50,6 +50,10 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto, createdBy?: string) {
+    createUserDto.password = hashSync(
+      createUserDto.password.toString(),
+      parseInt(config.SALTED_PASSWORD),
+    );
     const user = this.usersRepository.create(createUserDto);
     const res = await this.usersRepository.save(user);
     delete res.password;
@@ -63,8 +67,8 @@ export class UsersService {
     const [data, total] = await Promise.all([
       this.usersRepository.find({
         select: this.findOptionsSelect,
-        skip: queryDto.offset,
-        take: queryDto.limit,
+        skip: queryDto?.offset,
+        take: queryDto?.limit,
       }),
 
       this.usersRepository.count({ select: { id: true } }),
@@ -79,8 +83,8 @@ export class UsersService {
   async findAllFollowers(userId: string, queryDto: QueryDto) {
     const [data, total] = await Promise.all([
       this.followsRepository.find({
-        skip: queryDto.offset,
-        take: queryDto.limit,
+        skip: queryDto?.offset,
+        take: queryDto?.limit,
         where: {
           to_uid: userId,
         },
@@ -109,8 +113,8 @@ export class UsersService {
   async findAllFollowing(userId: string, queryDto: QueryDto) {
     const [data, total] = await Promise.all([
       this.followsRepository.find({
-        skip: queryDto.offset,
-        take: queryDto.limit,
+        skip: queryDto?.offset,
+        take: queryDto?.limit,
         relations: {
           to_user: true,
         },

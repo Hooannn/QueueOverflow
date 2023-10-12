@@ -1,11 +1,43 @@
-import { BaseEntity } from ".";
-import { Entity, Column } from "typeorm";
+import { Topic, User } from ".";
+import {
+  Entity,
+  PrimaryColumn,
+  JoinColumn,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from "typeorm";
 
 @Entity("subscriptions")
-export class Subscription extends BaseEntity {
-  @Column()
+export class Subscription {
+  @Index()
+  @PrimaryColumn()
   uid: string;
 
-  @Column()
+  @Index()
+  @PrimaryColumn()
   topic_id: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({
+    name: "uid",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_subscriptions_user_id",
+  })
+  user: User;
+
+  @ManyToOne(() => Topic)
+  @JoinColumn({
+    name: "topic_id",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_subscriptions_topic_id",
+  })
+  topic: Topic;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

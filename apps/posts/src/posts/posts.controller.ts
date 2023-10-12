@@ -1,6 +1,11 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import {
+  ClientProxy,
+  MessagePattern,
+  Payload,
+  RpcException,
+} from '@nestjs/microservices';
 import {
   CreatePostDto,
   QueryDto,
@@ -9,7 +14,11 @@ import {
 
 @Controller()
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
+  ) {}
 
   @MessagePattern('post.create')
   async create(
@@ -20,6 +29,8 @@ export class PostsController {
         params.createPostDto,
         params.createdBy,
       );
+
+      this.notificationsClient.emit('post.created', post.id);
 
       return post;
     } catch (error) {

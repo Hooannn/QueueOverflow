@@ -11,6 +11,7 @@ import { UsersGatewayController } from './gateway/user.gateway.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { CmsGatewayController } from './gateway/cms.gateway.controller';
 import { PostsGatewayController } from './gateway/posts.gateway.controller';
+import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -69,6 +70,7 @@ import { PostsGatewayController } from './gateway/posts.gateway.controller';
     UsersGatewayController,
     CmsGatewayController,
     PostsGatewayController,
+    SubscriptionsGatewayController,
   ],
   providers: [
     {

@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-
+import { Post } from '@queueoverflow/shared/entities';
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
@@ -23,5 +23,13 @@ export class NotificationsController {
     @Ctx() context: RmqContext,
   ) {
     return this.notificationsService.sendWelcomeEmail(params.email);
+  }
+
+  @EventPattern('post.created')
+  async notifyPostCreated(
+    @Payload() postId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyPostCreated(postId);
   }
 }

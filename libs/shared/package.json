@@ -1,6 +1,6 @@
 {
   "name": "@queueoverflow/shared",
-  "version": "0.0.49",
+  "version": "0.0.52",
   "description": "Shared module for Queueoverflow application",
   "author": "hoanthui",
   "license": "MIT",
