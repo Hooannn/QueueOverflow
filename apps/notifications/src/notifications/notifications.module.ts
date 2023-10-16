@@ -3,12 +3,14 @@ import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import config from 'src/configs';
-import { Notification } from '@queueoverflow/shared/entities';
+import { Notification, User } from '@queueoverflow/shared/entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Notification]),
+    RedisModule,
+    TypeOrmModule.forFeature([Notification, User]),
     ClientsModule.register([
       {
         name: 'POSTS_SERVICE',

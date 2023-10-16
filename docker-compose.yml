@@ -14,6 +14,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - SOCKET_EVENT_SECRET=wTD0y:6Ch(Z|H[Xh<rp"1Gx)3J]N[c
 
   notifications:
     build:
@@ -28,6 +29,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - GATEWAY_PORT=3000
+      - SOCKET_EVENT_SECRET=wTD0y:6Ch(Z|H[Xh<rp"1Gx)3J]N[c
 
   users:
     build:

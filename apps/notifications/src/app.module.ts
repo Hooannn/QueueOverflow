@@ -5,6 +5,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import config from './configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsModule } from './notifications/notifications.module';
+import { RedisModule } from './redis/redis.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -40,6 +41,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       },
     }),
     NotificationsModule,
+    RedisModule,
   ],
   controllers: [AppController],
 })

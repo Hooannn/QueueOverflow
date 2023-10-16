@@ -14,6 +14,9 @@ import { firstValueFrom } from 'rxjs';
 import { registerTemplate } from 'src/mailer/templates/password';
 import { welcomeTemplate } from 'src/mailer/templates/welcome';
 import { Repository } from 'typeorm';
+import { PinoLogger } from 'nestjs-pino';
+import config from 'src/configs';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class NotificationsService {
@@ -25,7 +28,10 @@ export class NotificationsService {
     private readonly usersClient: ClientProxy,
     @InjectRepository(Notification)
     private readonly notificationsRepository: Repository<Notification>,
+    private readonly logger: PinoLogger,
+    @Inject('REDIS') private readonly redisClient: Redis,
   ) {}
+
   private async sendMail(mailOptions: ISendMailOptions) {
     return this.mailerService.sendMail(mailOptions);
   }
@@ -49,47 +55,70 @@ export class NotificationsService {
   }
 
   async notifyPostCreated(postId: string) {
-    const post = await firstValueFrom<Post>(
-      this.postsClient.send('post.find_by_id', postId),
-    );
+    try {
+      const post = await firstValueFrom<Post>(
+        this.postsClient.send('post.find_by_id', postId),
+      );
 
-    if (!post.publish) return;
-    const [...subs] = await Promise.all(
-      post.topicIds.map((topicId) => this.findSubscriptionsByTopicId(topicId)),
-    );
+      if (!post.publish) return;
+      const [...subs] = await Promise.all(
+        post.topicIds.map((topicId) =>
+          this.findSubscriptionsByTopicId(topicId),
+        ),
+      );
 
-    const { data: followers } = await firstValueFrom<{
-      data: Follow[];
-      total?: number;
-    }>(
-      this.usersClient.send('user.find_followers', { userId: post.created_by }),
-    );
+      const { data: followers } = await firstValueFrom<{
+        data: Follow[];
+        total?: number;
+      }>(
+        this.usersClient.send('user.find_followers', {
+          userId: post.created_by,
+        }),
+      );
 
-    const followerUids = followers.map((follower) => follower.from_uid);
+      const followerUids = followers.map((follower) => follower.from_uid);
 
-    const subscriberUids = subs
-      .reduce((prev, current) => {
-        return [...prev, ...current];
-      }, [])
-      .map((sub) => sub.uid);
+      const subscriberUids = subs
+        .reduce((prev, current) => {
+          return [...prev, ...current];
+        }, [])
+        .map((sub) => sub.uid);
 
-    const uidsToNotify = Array.from(
-      new Set([...followerUids, ...subscriberUids]),
-    ).filter((uid) => uid !== post.created_by);
+      const uidsToNotify = Array.from(
+        new Set([...followerUids, ...subscriberUids]),
+      ).filter((uid) => uid !== post.created_by);
 
-    uidsToNotify.forEach((uid) => {
-      const createNotificationDto: CreateNotificationDto = {
-        recipient_id: uid,
-        title: 'New Post',
-        content: `${this.getUserName(
-          post.creator,
-        )} created a new post with title ${post.title}${this.generateTopicsName(
-          post,
-        )}`,
-      };
+      const createNotificationsDto: CreateNotificationDto[] = uidsToNotify.map(
+        (uid) => ({
+          recipient_id: uid,
+          title: 'New Post',
+          content: `${this.getUserName(
+            post.creator,
+          )} created a new post with title "${
+            post.title
+          }"${this.generateTopicsName(post)}`,
+        }),
+      );
 
-      this.create(createNotificationDto);
-    });
+      // Save notifications to db
+      await this.createMultiple(createNotificationsDto);
+      // Emit socket events
+      this.redisClient.publish(
+        'events',
+        JSON.stringify({
+          event: 'new-notifications',
+          token: config.SOCKET_EVENT_SECRET,
+          uids: uidsToNotify,
+        }),
+      );
+      // TODO: push notifications
+      // console.log('push')
+    } catch (error) {
+      this.logger.error(
+        'Error handling notifyPostCreated',
+        JSON.stringify(error),
+      );
+    }
   }
 
   private generateTopicsName(post: Post): string {
@@ -123,5 +152,9 @@ export class NotificationsService {
     );
 
     return await this.notificationsRepository.save(notification);
+  }
+
+  async createMultiple(createNotificationsDto: CreateNotificationDto[]) {
+    return await this.notificationsRepository.insert(createNotificationsDto);
   }
 }

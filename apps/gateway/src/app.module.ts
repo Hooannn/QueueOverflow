@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
-import { RedisModule } from './redis/redis.module';
 import config from './configs';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
@@ -12,6 +11,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { CmsGatewayController } from './gateway/cms.gateway.controller';
 import { PostsGatewayController } from './gateway/posts.gateway.controller';
 import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.controller';
+import { WebsocketModule } from './websocket/module';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -28,7 +28,6 @@ import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.c
       secret: config.JWT_AUTH_SECRET,
       signOptions: { expiresIn: '60s' },
     }),
-    RedisModule,
     ClientsModule.register([
       {
         name: 'USERS_SERVICE',
@@ -63,7 +62,19 @@ import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.c
           },
         },
       },
+      {
+        name: 'NOTIFICATIONS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'notifications_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
+    WebsocketModule,
   ],
   controllers: [
     AppController,
