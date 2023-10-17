@@ -6,6 +6,7 @@ import config from './configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RedisModule } from './redis/redis.module';
+import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -42,6 +43,7 @@ import { RedisModule } from './redis/redis.module';
     }),
     NotificationsModule,
     RedisModule,
+    PushNotificationsModule,
   ],
   controllers: [AppController],
 })

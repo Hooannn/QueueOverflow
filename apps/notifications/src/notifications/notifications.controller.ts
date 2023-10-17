@@ -1,10 +1,21 @@
-import { Controller } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-import { Post } from '@queueoverflow/shared/entities';
+import {
+  Ctx,
+  EventPattern,
+  Payload,
+  RmqContext,
+  MessagePattern,
+  RpcException,
+} from '@nestjs/microservices';
+import { CreateFcmTokenDto } from '@queueoverflow/shared/dtos';
+import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly pushNotificationsService: PushNotificationsService,
+  ) {}
 
   @EventPattern('mail.send.password')
   async sendPasswordEmail(
@@ -31,5 +42,29 @@ export class NotificationsController {
     @Ctx() context: RmqContext,
   ) {
     return this.notificationsService.notifyPostCreated(postId);
+  }
+
+  @MessagePattern('fcm_token.create')
+  async createFcmToken(
+    @Payload()
+    params: {
+      userId: string;
+      createFcmTokenDto: CreateFcmTokenDto;
+    },
+  ) {
+    try {
+      const fcmToken = await this.pushNotificationsService.createFcmToken(
+        params.userId,
+        params.createFcmTokenDto,
+      );
+
+      return fcmToken;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 }

@@ -17,10 +17,12 @@ import { Repository } from 'typeorm';
 import { PinoLogger } from 'nestjs-pino';
 import config from 'src/configs';
 import { Redis } from 'ioredis';
+import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
 
 @Injectable()
 export class NotificationsService {
   constructor(
+    private readonly pushNotificationsService: PushNotificationsService,
     private readonly mailerService: MailerService,
     @Inject('POSTS_SERVICE')
     private readonly postsClient: ClientProxy,
@@ -88,15 +90,19 @@ export class NotificationsService {
         new Set([...followerUids, ...subscriberUids]),
       ).filter((uid) => uid !== post.created_by);
 
+      const notificationBody = {
+        title: 'New Post',
+        content: `${this.getUserName(
+          post.creator,
+        )} created a new post with title "${
+          post.title
+        }"${this.generateTopicsName(post)}`,
+      };
+
       const createNotificationsDto: CreateNotificationDto[] = uidsToNotify.map(
         (uid) => ({
           recipient_id: uid,
-          title: 'New Post',
-          content: `${this.getUserName(
-            post.creator,
-          )} created a new post with title "${
-            post.title
-          }"${this.generateTopicsName(post)}`,
+          ...notificationBody,
         }),
       );
 
@@ -111,8 +117,8 @@ export class NotificationsService {
           uids: uidsToNotify,
         }),
       );
-      // TODO: push notifications
-      // console.log('push')
+      // Push notifications
+      this.pushNotificationsService.push(uidsToNotify, notificationBody);
     } catch (error) {
       this.logger.error(
         'Error handling notifyPostCreated',

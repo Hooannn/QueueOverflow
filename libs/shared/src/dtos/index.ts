@@ -4,3 +4,4 @@ export * from "./auth";
 export * from "./posts";
 export * from "./topics";
 export * from "./notifications";
+export * from "./fcm-tokens";

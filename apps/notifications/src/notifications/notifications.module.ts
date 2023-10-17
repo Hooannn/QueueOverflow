@@ -6,9 +6,11 @@ import config from 'src/configs';
 import { Notification, User } from '@queueoverflow/shared/entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from 'src/redis/redis.module';
+import { PushNotificationsModule } from 'src/push-notifications/push-notifications.module';
 
 @Module({
   imports: [
+    PushNotificationsModule,
     RedisModule,
     TypeOrmModule.forFeature([Notification, User]),
     ClientsModule.register([
@@ -38,5 +40,6 @@ import { RedisModule } from 'src/redis/redis.module';
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService],
+  exports: [NotificationsService],
 })
 export class NotificationsModule {}

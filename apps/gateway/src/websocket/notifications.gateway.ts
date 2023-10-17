@@ -36,11 +36,11 @@ export class NotificationsWebsocketGateway
   @WebSocketServer()
   server: Server;
 
-  async handleNewNotifications(eventData: any) {
+  async handleNewNotifications(payload: { token: string; uids: string[] }) {
     const secretKey = config.SOCKET_EVENT_SECRET;
-    const token = eventData.token;
+    const token = payload.token;
     if (token !== secretKey) return;
-    const uids = eventData.uids as string[];
+    const uids = payload.uids;
     const sockets = (await this.server.fetchSockets()).filter((socket) =>
       uids.includes(socket.handshake?.headers?.uid as string),
     );

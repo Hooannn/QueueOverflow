@@ -12,6 +12,7 @@ import { CmsGatewayController } from './gateway/cms.gateway.controller';
 import { PostsGatewayController } from './gateway/posts.gateway.controller';
 import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.controller';
 import { WebsocketModule } from './websocket/module';
+import { NotificationsGatewayController } from './gateway/notifications.gateway.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -82,6 +83,7 @@ import { WebsocketModule } from './websocket/module';
     CmsGatewayController,
     PostsGatewayController,
     SubscriptionsGatewayController,
+    NotificationsGatewayController,
   ],
   providers: [
     {
