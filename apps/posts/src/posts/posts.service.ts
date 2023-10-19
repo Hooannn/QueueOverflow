@@ -6,10 +6,12 @@ import {
   FindManyOptions,
   FindOptionsWhere,
 } from 'typeorm';
-import { Post } from '@queueoverflow/shared/entities';
+import { Post, Vote, VoteType, Comment } from '@queueoverflow/shared/entities';
 import {
+  CreateCommentDto,
   CreatePostDto,
   QueryPostDto,
+  UpdateCommentDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
 
@@ -18,6 +20,12 @@ export class PostsService {
   constructor(
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
+
+    @InjectRepository(Comment)
+    private readonly commentsRepository: Repository<Comment>,
+
+    @InjectRepository(Vote)
+    private readonly votesRepository: Repository<Vote>,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<Post> = {
@@ -31,6 +39,10 @@ export class PostsService {
       id: true,
       title: true,
       description: true,
+    },
+    votes: {
+      uid: true,
+      type: true,
     },
   };
 
@@ -84,6 +96,8 @@ export class PostsService {
       relations: {
         topics: true,
         creator: true,
+        votes: true,
+        comments: true,
       },
     });
     return res;
@@ -107,5 +121,80 @@ export class PostsService {
       created_by: removedBy,
     });
     return res;
+  }
+
+  async upvote(postId: string, userId: string) {
+    const existingVote = await this.votesRepository.findOne({
+      where: { uid: userId, post_id: postId, type: VoteType.Up },
+    });
+
+    if (existingVote) return await this.removeUpvote(postId, userId);
+
+    const newVote = this.votesRepository.create({
+      uid: userId,
+      post_id: postId,
+      type: VoteType.Up,
+    });
+    return await this.votesRepository.save(newVote);
+  }
+
+  async removeUpvote(postId: string, userId: string) {
+    return await this.votesRepository.delete({
+      uid: userId,
+      post_id: postId,
+      type: VoteType.Up,
+    });
+  }
+
+  async downvote(postId: string, userId: string) {
+    const existingVote = await this.votesRepository.findOne({
+      where: { uid: userId, post_id: postId, type: VoteType.Down },
+    });
+
+    if (existingVote) return await this.removeDownvote(postId, userId);
+
+    const newVote = this.votesRepository.create({
+      uid: userId,
+      post_id: postId,
+      type: VoteType.Down,
+    });
+    return await this.votesRepository.save(newVote);
+  }
+
+  async removeDownvote(postId: string, userId: string) {
+    return await this.votesRepository.delete({
+      uid: userId,
+      post_id: postId,
+      type: VoteType.Down,
+    });
+  }
+
+  async createComment(createCommentDto: CreateCommentDto, userId: string) {
+    const comment = this.commentsRepository.create({
+      ...createCommentDto,
+      created_by: userId,
+    });
+
+    return await this.commentsRepository.save(comment);
+  }
+
+  async removeComment(commentId: string, userId: string) {
+    return await this.commentsRepository.delete({
+      created_by: userId,
+      id: commentId,
+    });
+  }
+
+  async updateComment(
+    commentId: string,
+    updateCommentDto: UpdateCommentDto,
+    userId: string,
+  ) {
+    await this.commentsRepository.update(
+      { id: commentId, created_by: userId },
+      updateCommentDto,
+    );
+
+    return await this.commentsRepository.findOne({ where: { id: commentId } });
   }
 }

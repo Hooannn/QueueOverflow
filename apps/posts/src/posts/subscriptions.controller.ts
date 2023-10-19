@@ -31,6 +31,30 @@ export class SubscriptionsController {
     }
   }
 
+  @MessagePattern('subscription.topic.remove')
+  async unsubscribeTopic(
+    @Payload()
+    params: {
+      userId: string;
+      topicId: string;
+    },
+  ) {
+    try {
+      const res = await this.subscriptionsService.unsubscribeTopic(
+        params.userId,
+        params.topicId,
+      );
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @MessagePattern('subscription.find_by_user')
   async findAllSubcriptionsByUser(
     @Payload()

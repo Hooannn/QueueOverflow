@@ -193,8 +193,25 @@ export class UsersController {
           message: 'Bad request',
           status: HttpStatus.CONFLICT,
         });
-      const res = await this.usersService.followUser(params.from, params.to);
-      return res;
+      return await this.usersService.followUser(params.from, params.to);
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @MessagePattern('user.unfollow')
+  async unfollowUser(@Payload() params: { from: string; to: string }) {
+    try {
+      if (params.from === params.to)
+        throw new RpcException({
+          message: 'Bad request',
+          status: HttpStatus.CONFLICT,
+        });
+      return await this.usersService.unfollowUser(params.from, params.to);
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({

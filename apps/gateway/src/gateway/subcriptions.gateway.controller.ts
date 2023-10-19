@@ -50,6 +50,26 @@ export class SubscriptionsGatewayController {
     }
   }
 
+  @Delete('topic/:id')
+  async unsubscribeTopic(@Param('id') id: string, @Req() req) {
+    try {
+      await firstValueFrom<unknown>(
+        this.postsClient.send('subscription.topic.remove', {
+          topicId: id,
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<Subscription>({
+        code: 200,
+        success: true,
+        message: 'Success',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get()
   async findAllSubscriptions(
     @Req() req,

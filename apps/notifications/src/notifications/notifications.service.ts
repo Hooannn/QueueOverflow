@@ -9,15 +9,16 @@ import {
   Subscription,
   User,
 } from '@queueoverflow/shared/entities';
-import { CreateNotificationDto } from '@queueoverflow/shared/dtos';
+import { CreateNotificationDto, QueryDto } from '@queueoverflow/shared/dtos';
 import { firstValueFrom } from 'rxjs';
 import { registerTemplate } from 'src/mailer/templates/password';
 import { welcomeTemplate } from 'src/mailer/templates/welcome';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { PinoLogger } from 'nestjs-pino';
 import config from 'src/configs';
 import { Redis } from 'ioredis';
 import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
+import { query } from 'express';
 
 @Injectable()
 export class NotificationsService {
@@ -162,5 +163,56 @@ export class NotificationsService {
 
   async createMultiple(createNotificationsDto: CreateNotificationDto[]) {
     return await this.notificationsRepository.insert(createNotificationsDto);
+  }
+
+  async findAll(userId: string, queryDto: QueryDto) {
+    const findOptions: FindManyOptions<Notification> = {
+      skip: queryDto.offset,
+      take: queryDto.limit,
+      where: {
+        recipient_id: userId,
+      },
+      order: {
+        created_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<Notification> = {
+      select: { id: true },
+      where: findOptions.where,
+    };
+
+    const [data, total] = await Promise.all([
+      this.notificationsRepository.find(findOptions),
+      this.notificationsRepository.count(countOptions),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
+
+  async findOne(userId: string, notificationId: string) {
+    const res = await this.notificationsRepository.findOne({
+      where: {
+        id: notificationId,
+        recipient_id: userId,
+      },
+    });
+    return res;
+  }
+
+  async markAsRead(userId: string, notificationId: string) {
+    return await this.notificationsRepository.update(
+      { id: notificationId, recipient_id: userId },
+      { read: true },
+    );
+  }
+
+  async markAllAsRead(userId: string) {
+    return await this.notificationsRepository.update(
+      { recipient_id: userId },
+      { read: true },
+    );
   }
 }

@@ -1,5 +1,13 @@
-import { BaseEntity } from ".";
-import { Entity, Column, ManyToMany, RelationId, JoinTable } from "typeorm";
+import { BaseEntity, Comment, Vote } from ".";
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  RelationId,
+  JoinTable,
+  OneToMany,
+  JoinColumn,
+} from "typeorm";
 import { Topic } from "./topic.entity";
 
 @Entity("posts")
@@ -15,18 +23,11 @@ export class Post extends BaseEntity {
   content: string;
 
   @Column({
-    type: "integer",
+    type: "text",
+    array: true,
     nullable: true,
-    default: 0,
   })
-  upvotes: number;
-
-  @Column({
-    type: "integer",
-    nullable: true,
-    default: 0,
-  })
-  downvotes: number;
+  tags?: string[];
 
   @Column({
     type: "boolean",
@@ -40,7 +41,21 @@ export class Post extends BaseEntity {
   })
   meta_data?: any;
 
-  @ManyToMany((type) => Topic)
+  @OneToMany(
+    () => Vote,
+    (vote) => vote.post
+  )
+  @JoinColumn()
+  votes: Vote[];
+
+  @OneToMany(
+    () => Comment,
+    (comment) => comment.post
+  )
+  @JoinColumn()
+  comments: Comment[];
+
+  @ManyToMany(() => Topic)
   @JoinTable({
     name: "posts_topics",
     joinColumn: {
@@ -53,7 +68,4 @@ export class Post extends BaseEntity {
     },
   })
   topics: Topic[];
-
-  @RelationId((post: Post) => post.topics)
-  topicIds: string[];
 }

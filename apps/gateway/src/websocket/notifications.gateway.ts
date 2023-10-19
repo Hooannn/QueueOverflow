@@ -41,10 +41,14 @@ export class NotificationsWebsocketGateway
     const token = payload.token;
     if (token !== secretKey) return;
     const uids = payload.uids;
-    const sockets = (await this.server.fetchSockets()).filter((socket) =>
+
+    const serverSockets = await this.server.fetchSockets();
+
+    const socketsToNotify = serverSockets.filter((socket) =>
       uids.includes(socket.handshake?.headers?.uid as string),
     );
-    sockets.forEach((socket) =>
+
+    socketsToNotify.forEach((socket) =>
       socket.emit('new-notifications', {
         uid: socket.handshake?.headers?.uid,
       }),

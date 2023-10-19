@@ -257,6 +257,29 @@ export class UsersGatewayController {
     }
   }
 
+  @Delete('follow/:id')
+  async unfollowUser(@Param('id') id: string, @Req() req) {
+    try {
+      if (req.auth?.userId == id)
+        throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
+
+      await firstValueFrom<unknown>(
+        this.usersClient.send('user.unfollow', {
+          from: req.auth?.userId,
+          to: id,
+        }),
+      );
+
+      return new Response<unknown>({
+        code: 200,
+        success: true,
+        message: 'Success',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get('follow/followers')
   async findAllFollowers(@Req() req, @Query() queryDto: QueryDto) {
     try {

@@ -8,3 +8,4 @@ export * from "./subscription.entity";
 export * from "./topic.entity";
 export * from "./post.entity";
 export * from "./fcm-token.entity";
+export * from "./vote.entity";

@@ -17,20 +17,17 @@ export class CreatePostDto {
   content: string;
 
   @IsOptional()
-  @IsNumber()
-  upvotes?: number;
-
-  @IsOptional()
-  @IsNumber()
-  downvotes?: number;
-
-  @IsOptional()
   @IsBoolean()
   publish?: boolean;
 
   @IsArray()
   @IsOptional()
   topics?: { id: string }[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 
   @IsOptional()
   meta_data?: any;

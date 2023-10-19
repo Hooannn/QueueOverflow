@@ -8,7 +8,7 @@ import {
   MessagePattern,
   RpcException,
 } from '@nestjs/microservices';
-import { CreateFcmTokenDto } from '@queueoverflow/shared/dtos';
+import { CreateFcmTokenDto, QueryDto } from '@queueoverflow/shared/dtos';
 import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
 @Controller('notifications')
 export class NotificationsController {
@@ -59,6 +59,96 @@ export class NotificationsController {
       );
 
       return fcmToken;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @EventPattern('notification.find_all')
+  async findAll(
+    @Payload()
+    params: {
+      userId: string;
+      queryDto: QueryDto;
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    try {
+      const res = await this.notificationsService.findAll(
+        params.userId,
+        params.queryDto,
+      );
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @EventPattern('notification.find_by_id')
+  async findOne(
+    @Payload()
+    params: {
+      userId: string;
+      notificationId: string;
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    try {
+      const res = await this.notificationsService.findOne(
+        params.userId,
+        params.notificationId,
+      );
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @EventPattern('notification.mark_all')
+  async markAllAsRead(@Payload() userId: string, @Ctx() context: RmqContext) {
+    try {
+      const res = await this.notificationsService.markAllAsRead(userId);
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @EventPattern('notification.mark_by_id')
+  async markAsRead(
+    @Payload()
+    params: {
+      userId: string;
+      notificationId: string;
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    try {
+      const res = await this.notificationsService.markAsRead(
+        params.userId,
+        params.notificationId,
+      );
+
+      return res;
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({

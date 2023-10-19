@@ -5,3 +5,5 @@ export * from "./posts";
 export * from "./topics";
 export * from "./notifications";
 export * from "./fcm-tokens";
+export * from "./votes";
+export * from "./comments";

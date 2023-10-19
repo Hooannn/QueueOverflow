@@ -1,5 +1,5 @@
-import { BaseEntity } from ".";
-import { Entity, Column } from "typeorm";
+import { BaseEntity, Post } from ".";
+import { Entity, Column, Index, ManyToOne, JoinColumn } from "typeorm";
 
 @Entity("comments")
 export class Comment extends BaseEntity {
@@ -10,14 +10,23 @@ export class Comment extends BaseEntity {
   content?: string;
 
   @Column({
-    type: "boolean",
-    default: false,
-  })
-  public: boolean;
-
-  @Column({
     type: "jsonb",
     nullable: true,
   })
   meta_data?: any;
+
+  @Index()
+  @Column({ type: "uuid" })
+  post_id: string;
+
+  @ManyToOne(
+    () => Post,
+    (post) => post.comments
+  )
+  @JoinColumn({
+    name: "post_id",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_comment_post_id",
+  })
+  post: Post;
 }

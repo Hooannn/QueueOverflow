@@ -96,7 +96,6 @@ export class CmsGatewayController {
   }
 
   @Get('/topics')
-  @Roles(Role.Admin)
   async findAllTopics(
     @Query() queryDto: QueryDto,
     @Query('relations', new ParseArrayPipe({ optional: true }))
@@ -121,7 +120,6 @@ export class CmsGatewayController {
   }
 
   @Get('/topics/:id')
-  @Roles(Role.Admin)
   async findOne(@Param('id') id: string) {
     try {
       const topic = await firstValueFrom<Topic>(

@@ -240,8 +240,7 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const res = await this.usersRepository.delete(id);
-    return res;
+    return await this.usersRepository.delete(id);
   }
 
   async followUser(from_uid: string, to_uid: string) {
@@ -256,7 +255,10 @@ export class UsersService {
       });
 
     const newFollow = this.followsRepository.create({ from_uid, to_uid });
-    const res = await this.followsRepository.save(newFollow);
-    return res;
+    return await this.followsRepository.save(newFollow);
+  }
+
+  async unfollowUser(from_uid: string, to_uid: string) {
+    return await this.followsRepository.delete({ from_uid, to_uid });
   }
 }

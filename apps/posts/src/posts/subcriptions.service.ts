@@ -41,6 +41,13 @@ export class SubscriptionsService {
     return res;
   }
 
+  async unsubscribeTopic(userId: string, topicId: string) {
+    return await this.subscriptionsRepository.delete({
+      uid: userId,
+      topic_id: topicId,
+    });
+  }
+
   async findAllSubcriptionsByUser(userId: string, queryDto: QueryDto) {
     const [data, total] = await Promise.all([
       this.subscriptionsRepository.find({
