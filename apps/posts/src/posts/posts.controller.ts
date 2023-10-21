@@ -7,10 +7,8 @@ import {
   RpcException,
 } from '@nestjs/microservices';
 import {
-  CreateCommentDto,
   CreatePostDto,
   QueryDto,
-  UpdateCommentDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
 
@@ -187,81 +185,6 @@ export class PostsController {
     try {
       return await this.postsService.removeDownvote(
         params.postId,
-        params.userId,
-      );
-    } catch (error) {
-      const e = error instanceof RpcException ? error.getError() : error;
-      throw new RpcException({
-        message: e?.message || 'Invalid request',
-        status: e?.status || HttpStatus.BAD_REQUEST,
-      });
-    }
-  }
-
-  @MessagePattern('post.comment.create')
-  async createComment(
-    @Payload()
-    params: {
-      createCommentDto: CreateCommentDto;
-      userId: string;
-    },
-  ) {
-    try {
-      const comment = await this.postsService.createComment(
-        params.createCommentDto,
-        params.userId,
-      );
-
-      this.notificationsClient.emit('post.comment.created', {
-        postId: comment.post_id,
-        commentId: comment.id,
-      });
-
-      return comment;
-    } catch (error) {
-      const e = error instanceof RpcException ? error.getError() : error;
-      throw new RpcException({
-        message: e?.message || 'Invalid request',
-        status: e?.status || HttpStatus.BAD_REQUEST,
-      });
-    }
-  }
-
-  @MessagePattern('post.comment.remove')
-  async removeComment(
-    @Payload()
-    params: {
-      commentId: string;
-      userId: string;
-    },
-  ) {
-    try {
-      return await this.postsService.removeComment(
-        params.commentId,
-        params.userId,
-      );
-    } catch (error) {
-      const e = error instanceof RpcException ? error.getError() : error;
-      throw new RpcException({
-        message: e?.message || 'Invalid request',
-        status: e?.status || HttpStatus.BAD_REQUEST,
-      });
-    }
-  }
-
-  @MessagePattern('post.comment.update')
-  async updateComment(
-    @Payload()
-    params: {
-      commentId: string;
-      userId: string;
-      updateCommentDto: UpdateCommentDto;
-    },
-  ) {
-    try {
-      return await this.postsService.updateComment(
-        params.commentId,
-        params.updateCommentDto,
         params.userId,
       );
     } catch (error) {

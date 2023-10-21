@@ -8,17 +8,21 @@ import {
   Post,
   Subscription,
   User,
+  Comment,
 } from '@queueoverflow/shared/entities';
 import { CreateNotificationDto, QueryDto } from '@queueoverflow/shared/dtos';
 import { firstValueFrom } from 'rxjs';
 import { registerTemplate } from 'src/mailer/templates/password';
 import { welcomeTemplate } from 'src/mailer/templates/welcome';
-import { FindManyOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { PinoLogger } from 'nestjs-pino';
 import config from 'src/configs';
 import { Redis } from 'ioredis';
 import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
-import { query } from 'express';
+
+class InternalCreateNotificationDto extends CreateNotificationDto {
+  created_by?: string;
+}
 
 @Injectable()
 export class NotificationsService {
@@ -65,9 +69,7 @@ export class NotificationsService {
 
       if (!post.publish) return;
       const [...subs] = await Promise.all(
-        post.topicIds.map((topicId) =>
-          this.findSubscriptionsByTopicId(topicId),
-        ),
+        post.topics.map((topic) => this.findSubscriptionsByTopicId(topic.id)),
       );
 
       const { data: followers } = await firstValueFrom<{
@@ -100,20 +102,20 @@ export class NotificationsService {
         }"${this.generateTopicsName(post)}`,
       };
 
-      const createNotificationsDto: CreateNotificationDto[] = uidsToNotify.map(
-        (uid) => ({
+      const createNotificationsDto: InternalCreateNotificationDto[] =
+        uidsToNotify.map((uid) => ({
           recipient_id: uid,
+          created_by: post.created_by,
           ...notificationBody,
-        }),
-      );
+        }));
 
       // Save notifications to db
       await this.createMultiple(createNotificationsDto);
       // Emit socket events
       this.redisClient.publish(
-        'events',
+        'notifications',
         JSON.stringify({
-          event: 'new-notifications',
+          event: 'new-notification',
           token: config.SOCKET_EVENT_SECRET,
           uids: uidsToNotify,
         }),
@@ -123,6 +125,167 @@ export class NotificationsService {
     } catch (error) {
       this.logger.error(
         'Error handling notifyPostCreated',
+        JSON.stringify(error),
+      );
+    }
+  }
+
+  async notifyCommentCreated(postId: string, commendId: string) {
+    try {
+      this.redisClient.publish(
+        'posts',
+        JSON.stringify({
+          event: 'new-comment',
+          token: config.SOCKET_EVENT_SECRET,
+          postId,
+        }),
+      );
+
+      const [post, comment] = await Promise.all([
+        firstValueFrom<Post>(this.postsClient.send('post.find_by_id', postId)),
+        firstValueFrom<Comment>(
+          this.postsClient.send('comment.find_by_id', commendId),
+        ),
+      ]);
+      const uidsToNotify = [];
+      const createNotificationsDto: InternalCreateNotificationDto[] = [];
+
+      if (post.created_by !== comment.created_by) {
+        uidsToNotify.push(post.created_by);
+        const notificationBody = {
+          title: 'New comment',
+          content: `${this.getUserName(
+            comment.creator,
+          )} commented to your post "${post.title}": "${comment.content}"`,
+        };
+
+        createNotificationsDto.push({
+          recipient_id: post.created_by,
+          created_by: comment.created_by,
+          ...notificationBody,
+        });
+
+        // Push notifications
+        this.pushNotificationsService.push([post.created_by], notificationBody);
+      }
+
+      if (
+        comment.parent_id &&
+        comment.parent?.created_by &&
+        comment.parent?.created_by !== comment.created_by
+      ) {
+        uidsToNotify.push(comment.parent.created_by);
+        const notificationBody = {
+          title: 'New replying',
+          content: `${this.getUserName(
+            comment.creator,
+          )} replied to your comment "${comment.parent.content}": "${
+            comment.content
+          }"`,
+        };
+        createNotificationsDto.push({
+          recipient_id: comment.parent.created_by,
+          created_by: comment.created_by,
+          ...notificationBody,
+        });
+
+        // Push notifications
+        this.pushNotificationsService.push(
+          [comment.parent?.created_by],
+          notificationBody,
+        );
+      }
+
+      // Save notifications to db
+      await this.createMultiple(createNotificationsDto);
+      // Emit socket events
+      this.redisClient.publish(
+        'notifications',
+        JSON.stringify({
+          event: 'new-notification',
+          token: config.SOCKET_EVENT_SECRET,
+          uids: uidsToNotify,
+        }),
+      );
+    } catch (error) {
+      this.logger.error(
+        'Error handling notifyCommentCreated',
+        JSON.stringify(error),
+      );
+    }
+  }
+
+  async notifyUserFollowed(from_uid: string, to_uid: string) {
+    try {
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_id', from_uid),
+      );
+      const uidsToNotify = [to_uid];
+      const notificationBody = {
+        title: 'New Follower',
+        content: `${this.getUserName(user)} followed you."`,
+      };
+
+      const createNotificationDto: InternalCreateNotificationDto = {
+        recipient_id: to_uid,
+        created_by: from_uid,
+        ...notificationBody,
+      };
+
+      // Save notifications to db
+      await this.create(createNotificationDto);
+      // Emit socket events
+      this.redisClient.publish(
+        'notifications',
+        JSON.stringify({
+          event: 'new-notification',
+          token: config.SOCKET_EVENT_SECRET,
+          uids: uidsToNotify,
+        }),
+      );
+      // Push notifications
+      this.pushNotificationsService.push(uidsToNotify, notificationBody);
+    } catch (error) {
+      this.logger.error(
+        'Error handling notifyUserFollowed',
+        JSON.stringify(error),
+      );
+    }
+  }
+
+  async notifyUserUnfollowed(from_uid: string, to_uid: string) {
+    try {
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_id', from_uid),
+      );
+      const uidsToNotify = [to_uid];
+      const notificationBody = {
+        title: 'Follower is leaving',
+        content: `${this.getUserName(user)} unfollowed you."`,
+      };
+
+      const createNotificationDto: InternalCreateNotificationDto = {
+        recipient_id: to_uid,
+        created_by: from_uid,
+        ...notificationBody,
+      };
+
+      // Save notifications to db
+      await this.create(createNotificationDto);
+      // Emit socket events
+      this.redisClient.publish(
+        'notifications',
+        JSON.stringify({
+          event: 'new-notification',
+          token: config.SOCKET_EVENT_SECRET,
+          uids: uidsToNotify,
+        }),
+      );
+      // Push notifications
+      this.pushNotificationsService.push(uidsToNotify, notificationBody);
+    } catch (error) {
+      this.logger.error(
+        'Error handling notifyUserUnfollowed',
         JSON.stringify(error),
       );
     }

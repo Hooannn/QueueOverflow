@@ -1,8 +1,6 @@
-import { BaseEntity } from "./";
 import {
   Entity,
   Column,
-  OneToMany,
   CreateDateColumn,
   Generated,
   PrimaryGeneratedColumn,

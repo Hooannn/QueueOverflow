@@ -36,12 +36,45 @@ export class NotificationsController {
     return this.notificationsService.sendWelcomeEmail(params.email);
   }
 
+  @EventPattern('user.followed')
+  async notifyUserFollowed(
+    @Payload() params: { from_uid: string; to_uid: string },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyUserFollowed(
+      params.from_uid,
+      params.to_uid,
+    );
+  }
+
+  @EventPattern('user.unfollowed')
+  async notifyUserUnfollowed(
+    @Payload() params: { from_uid: string; to_uid: string },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyUserUnfollowed(
+      params.from_uid,
+      params.to_uid,
+    );
+  }
+
   @EventPattern('post.created')
   async notifyPostCreated(
     @Payload() postId: string,
     @Ctx() context: RmqContext,
   ) {
     return this.notificationsService.notifyPostCreated(postId);
+  }
+
+  @EventPattern('comment.created')
+  async notifyCommentCreated(
+    @Payload() params: { postId: string; commentId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyCommentCreated(
+      params.postId,
+      params.commentId,
+    );
   }
 
   @MessagePattern('fcm_token.create')

@@ -1,31 +1,20 @@
-import { Post, User } from ".";
 import {
   Column,
   CreateDateColumn,
-  Entity,
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { User } from "./user.entity";
 
 export enum VoteType {
   Up,
   Down,
 }
 
-@Entity("votes")
-export class Vote {
-  @Index()
-  @PrimaryColumn({ type: "uuid" })
-  uid: string;
-
-  @Index()
-  @PrimaryColumn({ type: "uuid" })
-  post_id: string;
-
+export abstract class Vote {
   @Column({
     type: "enum",
     enum: VoteType,
@@ -38,6 +27,10 @@ export class Vote {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Index()
+  @PrimaryColumn({ type: "uuid" })
+  uid: string;
+
   @ManyToOne(() => User)
   @JoinColumn({
     name: "uid",
@@ -45,15 +38,4 @@ export class Vote {
     foreignKeyConstraintName: "fk_vote_user_id",
   })
   creator: User;
-
-  @ManyToOne(
-    () => Post,
-    (post) => post.votes
-  )
-  @JoinColumn({
-    name: "post_id",
-    referencedColumnName: "id",
-    foreignKeyConstraintName: "fk_vote_post_id",
-  })
-  post: Post;
 }

@@ -1,4 +1,4 @@
-import { BaseEntity, Comment, Vote } from ".";
+import { BaseEntity, Comment, PostVote, Topic } from ".";
 import {
   Entity,
   Column,
@@ -8,7 +8,6 @@ import {
   OneToMany,
   JoinColumn,
 } from "typeorm";
-import { Topic } from "./topic.entity";
 
 @Entity("posts")
 export class Post extends BaseEntity {
@@ -42,11 +41,11 @@ export class Post extends BaseEntity {
   meta_data?: any;
 
   @OneToMany(
-    () => Vote,
+    () => PostVote,
     (vote) => vote.post
   )
   @JoinColumn()
-  votes: Vote[];
+  votes: PostVote[];
 
   @OneToMany(
     () => Comment,

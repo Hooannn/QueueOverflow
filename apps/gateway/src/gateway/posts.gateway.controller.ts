@@ -15,13 +15,11 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
-  CreateCommentDto,
   CreatePostDto,
   QueryDto,
-  UpdateCommentDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
-import { Comment, Post as QPost } from '@queueoverflow/shared/entities';
+import { Post as QPost } from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
 import { Response } from '@queueoverflow/shared/utils';
 
@@ -218,73 +216,6 @@ export class PostsGatewayController {
         code: 200,
         success: true,
         message: 'Success',
-      });
-    } catch (error) {
-      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Post('comments')
-  async createComment(@Req() req, @Body() createCommentDto: CreateCommentDto) {
-    try {
-      const comment = await firstValueFrom<Comment>(
-        this.postsClient.send('post.comment.create', {
-          createCommentDto,
-          userId: req.auth?.userId,
-        }),
-      );
-
-      return new Response<Comment>({
-        code: 201,
-        success: true,
-        data: comment,
-        message: 'Created',
-      });
-    } catch (error) {
-      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Delete('comments/:id')
-  async removeComment(@Req() req, @Param('id') id: string) {
-    try {
-      await firstValueFrom<unknown>(
-        this.postsClient.send('post.comment.remove', {
-          commentId: id,
-          userId: req.auth?.userId,
-        }),
-      );
-
-      return new Response<unknown>({
-        code: 200,
-        success: true,
-        message: 'Deleted',
-      });
-    } catch (error) {
-      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Patch('comments/:id')
-  async updateComment(
-    @Req() req,
-    @Param('id') id: string,
-    @Body() updateCommentDto: UpdateCommentDto,
-  ) {
-    try {
-      const comment = await firstValueFrom<Comment>(
-        this.postsClient.send('post.comment.update', {
-          commentId: id,
-          userId: req.auth?.userId,
-          updateCommentDto,
-        }),
-      );
-
-      return new Response<Comment>({
-        code: 200,
-        success: true,
-        data: comment,
-        message: 'Updated',
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

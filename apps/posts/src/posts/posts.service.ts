@@ -6,12 +6,10 @@ import {
   FindManyOptions,
   FindOptionsWhere,
 } from 'typeorm';
-import { Post, Vote, VoteType, Comment } from '@queueoverflow/shared/entities';
+import { Post, VoteType, PostVote, User } from '@queueoverflow/shared/entities';
 import {
-  CreateCommentDto,
   CreatePostDto,
   QueryPostDto,
-  UpdateCommentDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
 
@@ -21,28 +19,44 @@ export class PostsService {
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
 
-    @InjectRepository(Comment)
-    private readonly commentsRepository: Repository<Comment>,
-
-    @InjectRepository(Vote)
-    private readonly votesRepository: Repository<Vote>,
+    @InjectRepository(PostVote)
+    private readonly votesRepository: Repository<PostVote>,
   ) {}
 
+  private userFindOptionsSelect: FindOptionsSelect<User> = {
+    first_name: true,
+    last_name: true,
+    avatar: true,
+    id: true,
+    created_at: true,
+  };
+
+  private voteFindOptionsSelect: FindOptionsSelect<PostVote> = {
+    uid: true,
+    type: true,
+  };
+
   private findOptionsSelect: FindOptionsSelect<Post> = {
-    creator: {
-      first_name: true,
-      last_name: true,
-      avatar: true,
-      id: true,
-    },
+    creator: this.userFindOptionsSelect,
     topics: {
       id: true,
       title: true,
       description: true,
     },
-    votes: {
-      uid: true,
-      type: true,
+    votes: this.voteFindOptionsSelect,
+    comments: {
+      id: true,
+      idx: true,
+      created_at: true,
+      created_by: true,
+      updated_at: true,
+      content: true,
+      is_root: true,
+      parent_id: true,
+      meta_data: true,
+      post_id: true,
+      creator: this.userFindOptionsSelect,
+      votes: this.voteFindOptionsSelect,
     },
   };
 
@@ -97,7 +111,10 @@ export class PostsService {
         topics: true,
         creator: true,
         votes: true,
-        comments: true,
+        comments: {
+          creator: true,
+          votes: true,
+        },
       },
     });
     return res;
@@ -167,34 +184,5 @@ export class PostsService {
       post_id: postId,
       type: VoteType.Down,
     });
-  }
-
-  async createComment(createCommentDto: CreateCommentDto, userId: string) {
-    const comment = this.commentsRepository.create({
-      ...createCommentDto,
-      created_by: userId,
-    });
-
-    return await this.commentsRepository.save(comment);
-  }
-
-  async removeComment(commentId: string, userId: string) {
-    return await this.commentsRepository.delete({
-      created_by: userId,
-      id: commentId,
-    });
-  }
-
-  async updateComment(
-    commentId: string,
-    updateCommentDto: UpdateCommentDto,
-    userId: string,
-  ) {
-    await this.commentsRepository.update(
-      { id: commentId, created_by: userId },
-      updateCommentDto,
-    );
-
-    return await this.commentsRepository.findOne({ where: { id: commentId } });
   }
 }

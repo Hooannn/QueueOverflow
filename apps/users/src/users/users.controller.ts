@@ -1,4 +1,4 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
   ChangePasswordDto,
@@ -7,17 +7,19 @@ import {
   UpdateUserDto,
 } from '@queueoverflow/shared/dtos';
 import {
+  ClientProxy,
   MessagePattern,
-  EventPattern,
   Payload,
-  RmqContext,
-  Ctx,
   RpcException,
 } from '@nestjs/microservices';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
+  ) {}
 
   @MessagePattern('user.check')
   async checkUser(@Payload() email: string) {
@@ -193,7 +195,15 @@ export class UsersController {
           message: 'Bad request',
           status: HttpStatus.CONFLICT,
         });
-      return await this.usersService.followUser(params.from, params.to);
+
+      const follow = await this.usersService.followUser(params.from, params.to);
+
+      this.notificationsClient.emit('user.followed', {
+        from_uid: follow.from_uid,
+        to_uid: follow.to_uid,
+      });
+
+      return follow;
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
@@ -211,7 +221,15 @@ export class UsersController {
           message: 'Bad request',
           status: HttpStatus.CONFLICT,
         });
-      return await this.usersService.unfollowUser(params.from, params.to);
+
+      const res = await this.usersService.unfollowUser(params.from, params.to);
+
+      this.notificationsClient.emit('user.unfollowed', {
+        from_uid: params.from,
+        to_uid: params.to,
+      });
+
+      return res;
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({

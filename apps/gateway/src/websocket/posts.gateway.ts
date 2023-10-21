@@ -15,41 +15,41 @@ import { Redis } from 'ioredis';
   cors: {
     origin: '*',
   },
-  namespace: 'notifications',
+  namespace: 'posts',
 })
-export class NotificationsWebsocketGateway
+export class PostsWebsocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private readonly logger: PinoLogger,
     @Inject('REDIS_SUBSCRIBER') private readonly redisSubscriberClient: Redis,
   ) {
-    this.redisSubscriberClient.subscribe('notifications');
+    this.redisSubscriberClient.subscribe('posts');
     this.redisSubscriberClient.on('message', (ch, message) => {
-      if (ch === 'notifications') {
+      if (ch === 'posts') {
         const data = JSON.parse(message);
-        if (data.event === 'new-notification') this.handleNewNotification(data);
+        if (data.event === 'new-comment') this.handleNewComment(data);
       }
     });
   }
   @WebSocketServer()
   server: Server;
 
-  async handleNewNotification(payload: { token: string; uids: string[] }) {
+  async handleNewComment(payload: { token: string; postId: string }) {
     const secretKey = config.SOCKET_EVENT_SECRET;
     const token = payload.token;
     if (token !== secretKey) return;
-    const uids = payload.uids;
+    const postId = payload.postId;
 
     const serverSockets = await this.server.fetchSockets();
 
-    const socketsToNotify = serverSockets.filter((socket) =>
-      uids.includes(socket.handshake?.headers?.uid as string),
+    const socketsToNotify = serverSockets.filter(
+      (socket) => socket.handshake?.headers?.postId === postId,
     );
 
     socketsToNotify.forEach((socket) =>
-      socket.emit('new-notifications', {
-        uid: socket.handshake?.headers?.uid,
+      socket.emit('new-comment', {
+        postId: socket.handshake?.headers?.postId,
       }),
     );
   }

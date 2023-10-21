@@ -8,4 +8,6 @@ export * from "./subscription.entity";
 export * from "./topic.entity";
 export * from "./post.entity";
 export * from "./fcm-token.entity";
-export * from "./vote.entity";
+export * from "./post_vote.entity";
+export * from "./base.vote.entity";
+export * from "./comment_vote.entity";

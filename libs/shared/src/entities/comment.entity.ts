@@ -1,5 +1,12 @@
-import { BaseEntity, Post } from ".";
-import { Entity, Column, Index, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Post, CommentVote } from ".";
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from "typeorm";
 
 @Entity("comments")
 export class Comment extends BaseEntity {
@@ -10,10 +17,37 @@ export class Comment extends BaseEntity {
   content?: string;
 
   @Column({
+    type: "boolean",
+    default: true,
+  })
+  is_root: boolean;
+
+  @Column({
+    type: "uuid",
+    nullable: true,
+  })
+  parent_id?: string;
+
+  @ManyToOne(() => Comment)
+  @JoinColumn({
+    name: "parent_id",
+    referencedColumnName: "id",
+    foreignKeyConstraintName: "fk_comment_parent_id",
+  })
+  parent?: Comment;
+
+  @Column({
     type: "jsonb",
     nullable: true,
   })
   meta_data?: any;
+
+  @OneToMany(
+    () => CommentVote,
+    (vote) => vote.comment
+  )
+  @JoinColumn()
+  votes: CommentVote[];
 
   @Index()
   @Column({ type: "uuid" })

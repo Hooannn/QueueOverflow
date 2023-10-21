@@ -1,12 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
-import {
-  Post,
-  Subscription,
-  Vote,
-  Comment,
-} from '@queueoverflow/shared/entities';
+import { Post, Subscription, PostVote } from '@queueoverflow/shared/entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubscriptionsService } from './subcriptions.service';
 import { SubscriptionsController } from './subscriptions.controller';
@@ -15,7 +10,7 @@ import config from 'src/configs';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, Subscription, Vote, Comment]),
+    TypeOrmModule.forFeature([Post, Subscription, PostVote]),
     ClientsModule.register([
       {
         name: 'NOTIFICATIONS_SERVICE',

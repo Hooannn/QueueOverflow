@@ -13,6 +13,7 @@ import { PostsGatewayController } from './gateway/posts.gateway.controller';
 import { SubscriptionsGatewayController } from './gateway/subcriptions.gateway.controller';
 import { WebsocketModule } from './websocket/module';
 import { NotificationsGatewayController } from './gateway/notifications.gateway.controller';
+import { CommentsGatewayController } from './gateway/comments.gateway.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -84,6 +85,7 @@ import { NotificationsGatewayController } from './gateway/notifications.gateway.
     PostsGatewayController,
     SubscriptionsGatewayController,
     NotificationsGatewayController,
+    CommentsGatewayController,
   ],
   providers: [
     {
