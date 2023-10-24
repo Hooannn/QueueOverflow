@@ -102,4 +102,22 @@ export class SubscriptionsController {
       });
     }
   }
+
+  @MessagePattern('subscription.count_by_topic')
+  async countByTopic(
+    @Payload()
+    topicId: string,
+  ) {
+    try {
+      const res = await this.subscriptionsService.countByTopic(topicId);
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
 }

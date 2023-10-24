@@ -6,8 +6,10 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -87,7 +89,12 @@ export class NotificationsGatewayController {
   }
 
   @Get()
-  async findAll(@Req() req, @Body() queryDto: QueryDto) {
+  async findAll(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
     try {
       const { data, total } = await firstValueFrom<{
         data: Notification[];
@@ -95,7 +102,7 @@ export class NotificationsGatewayController {
       }>(
         this.notificationsClient.send('notification.find_all', {
           userId: req.auth?.userId,
-          queryDto,
+          queryDto: { ...queryDto, relations },
         }),
       );
 
@@ -104,6 +111,26 @@ export class NotificationsGatewayController {
         success: true,
         total,
         took: data.length,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('unread/count')
+  async countUnread(@Req() req) {
+    try {
+      const data = await firstValueFrom<number>(
+        this.notificationsClient.send(
+          'notification.count_unread',
+          req.auth?.userId,
+        ),
+      );
+
+      return new Response<number>({
+        code: 200,
+        success: true,
         data,
       });
     } catch (error) {

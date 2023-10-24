@@ -5,6 +5,7 @@ import {
   FindOptionsSelect,
   FindManyOptions,
   FindOptionsWhere,
+  DataSource,
 } from 'typeorm';
 import { Post, VoteType, PostVote, User } from '@queueoverflow/shared/entities';
 import {
@@ -16,6 +17,7 @@ import {
 @Injectable()
 export class PostsService {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
 
@@ -184,5 +186,14 @@ export class PostsService {
       post_id: postId,
       type: VoteType.Down,
     });
+  }
+
+  async countByTopic(topicId: string) {
+    return await this.dataSource
+      .getRepository('posts_topics' as any)
+      .createQueryBuilder('posts_topics' as any)
+      .select('topic_id')
+      .where('topic_id = :topicId', { topicId })
+      .getCount();
   }
 }

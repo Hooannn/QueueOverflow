@@ -1,11 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  FindOptionsSelect,
-  FindManyOptions,
-  FindOptionsWhere,
-} from 'typeorm';
+import { Repository, FindOptionsSelect } from 'typeorm';
 import { Subscription } from '@queueoverflow/shared/entities';
 import { RpcException } from '@nestjs/microservices';
 import { QueryDto } from '@queueoverflow/shared/dtos';
@@ -104,5 +99,13 @@ export class SubscriptionsService {
       data,
       total,
     };
+  }
+
+  async countByTopic(topicId: string) {
+    return await this.subscriptionsRepository.count({
+      where: {
+        topic_id: topicId,
+      },
+    });
   }
 }

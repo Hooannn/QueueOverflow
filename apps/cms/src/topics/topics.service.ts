@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateTopicDto,
@@ -6,6 +7,7 @@ import {
   UpdateTopicDto,
 } from '@queueoverflow/shared/dtos';
 import { Topic } from '@queueoverflow/shared/entities';
+import { firstValueFrom } from 'rxjs';
 import { Repository, FindOptionsSelect } from 'typeorm';
 
 @Injectable()
@@ -13,6 +15,8 @@ export class TopicsService {
   constructor(
     @InjectRepository(Topic)
     private readonly topicsRepository: Repository<Topic>,
+
+    @Inject('POSTS_SERVICE') private readonly postsClient: ClientProxy,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<Topic> = {
@@ -55,13 +59,24 @@ export class TopicsService {
   }
 
   async findOne(id: string) {
-    const res = await this.topicsRepository.findOne({
-      select: this.findOptionsSelect,
-      where: {
-        id,
-      },
-    });
-    return res;
+    const [topic, postsCount, subscriptionsCount] = await Promise.all([
+      this.topicsRepository.findOne({
+        select: this.findOptionsSelect,
+        where: {
+          id,
+        },
+      }),
+      firstValueFrom<number>(this.postsClient.send('post.count_by_topic', id)),
+      firstValueFrom<number>(
+        this.postsClient.send('subscription.count_by_topic', id),
+      ),
+    ]);
+
+    return {
+      ...topic,
+      posts_count: postsCount,
+      subscriptions_count: subscriptionsCount,
+    };
   }
 
   async update(id: string, updateTopicDto: UpdateTopicDto, updatedBy?: string) {

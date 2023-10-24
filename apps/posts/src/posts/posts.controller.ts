@@ -195,4 +195,20 @@ export class PostsController {
       });
     }
   }
+
+  @MessagePattern('post.count_by_topic')
+  async countByTopic(
+    @Payload()
+    topicId: string,
+  ) {
+    try {
+      return await this.postsService.countByTopic(topicId);
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
 }

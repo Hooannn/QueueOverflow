@@ -14,7 +14,7 @@ import { CreateNotificationDto, QueryDto } from '@queueoverflow/shared/dtos';
 import { firstValueFrom } from 'rxjs';
 import { registerTemplate } from 'src/mailer/templates/password';
 import { welcomeTemplate } from 'src/mailer/templates/welcome';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsSelect, Repository } from 'typeorm';
 import { PinoLogger } from 'nestjs-pino';
 import config from 'src/configs';
 import { Redis } from 'ioredis';
@@ -38,6 +38,17 @@ export class NotificationsService {
     private readonly logger: PinoLogger,
     @Inject('REDIS') private readonly redisClient: Redis,
   ) {}
+
+  private userFindOptionsSelect: FindOptionsSelect<User> = {
+    first_name: true,
+    last_name: true,
+    avatar: true,
+    id: true,
+  };
+
+  private findOptionsSelect: FindOptionsSelect<Notification> = {
+    creator: this.userFindOptionsSelect,
+  };
 
   private async sendMail(mailOptions: ISendMailOptions) {
     return this.mailerService.sendMail(mailOptions);
@@ -329,9 +340,12 @@ export class NotificationsService {
   }
 
   async findAll(userId: string, queryDto: QueryDto) {
+    console.log({ queryDto });
     const findOptions: FindManyOptions<Notification> = {
+      select: this.findOptionsSelect,
       skip: queryDto.offset,
       take: queryDto.limit,
+      relations: (queryDto as any).relations ?? [],
       where: {
         recipient_id: userId,
       },
@@ -355,11 +369,25 @@ export class NotificationsService {
     };
   }
 
+  async countUnread(userId: string) {
+    return await this.notificationsRepository.count({
+      where: {
+        recipient_id: userId,
+        read: false,
+      },
+      select: { id: true },
+    });
+  }
+
   async findOne(userId: string, notificationId: string) {
     const res = await this.notificationsRepository.findOne({
+      select: this.findOptionsSelect,
       where: {
         id: notificationId,
         recipient_id: userId,
+      },
+      relations: {
+        creator: true,
       },
     });
     return res;

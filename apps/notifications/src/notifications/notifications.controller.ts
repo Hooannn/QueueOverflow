@@ -151,6 +151,25 @@ export class NotificationsController {
     }
   }
 
+  @EventPattern('notification.count_unread')
+  async countUnread(
+    @Payload()
+    userId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    try {
+      const res = await this.notificationsService.countUnread(userId);
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @EventPattern('notification.mark_all')
   async markAllAsRead(@Payload() userId: string, @Ctx() context: RmqContext) {
     try {
