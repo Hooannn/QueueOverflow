@@ -126,6 +126,25 @@ export class NotificationsController {
     }
   }
 
+  @EventPattern('notification.delete_all')
+  async deleteAll(
+    @Payload()
+    userId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    try {
+      const res = await this.notificationsService.deleteAll(userId);
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @EventPattern('notification.find_by_id')
   async findOne(
     @Payload()

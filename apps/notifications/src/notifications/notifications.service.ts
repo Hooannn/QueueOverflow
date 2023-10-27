@@ -164,10 +164,8 @@ export class NotificationsService {
       if (post.created_by !== comment.created_by) {
         uidsToNotify.push(post.created_by);
         const notificationBody = {
-          title: 'New comment',
-          content: `${this.getUserName(
-            comment.creator,
-          )} commented to your post "${post.title}": "${comment.content}"`,
+          title: `${this.getUserName(comment.creator)} commented to your post`,
+          content: comment.content,
         };
 
         createNotificationsDto.push({
@@ -187,12 +185,8 @@ export class NotificationsService {
       ) {
         uidsToNotify.push(comment.parent.created_by);
         const notificationBody = {
-          title: 'New replying',
-          content: `${this.getUserName(
-            comment.creator,
-          )} replied to your comment "${comment.parent.content}": "${
-            comment.content
-          }"`,
+          title: `${this.getUserName(comment.creator)} replied to your comment`,
+          content: comment.content,
         };
         createNotificationsDto.push({
           recipient_id: comment.parent.created_by,
@@ -234,7 +228,7 @@ export class NotificationsService {
       const uidsToNotify = [to_uid];
       const notificationBody = {
         title: 'New Follower',
-        content: `${this.getUserName(user)} followed you."`,
+        content: `${this.getUserName(user)} followed you.`,
       };
 
       const createNotificationDto: InternalCreateNotificationDto = {
@@ -272,7 +266,7 @@ export class NotificationsService {
       const uidsToNotify = [to_uid];
       const notificationBody = {
         title: 'Follower is leaving',
-        content: `${this.getUserName(user)} unfollowed you."`,
+        content: `${this.getUserName(user)} unfollowed you.`,
       };
 
       const createNotificationDto: InternalCreateNotificationDto = {
@@ -339,8 +333,11 @@ export class NotificationsService {
     return await this.notificationsRepository.insert(createNotificationsDto);
   }
 
+  async deleteAll(userId: string) {
+    return await this.notificationsRepository.delete({ recipient_id: userId });
+  }
+
   async findAll(userId: string, queryDto: QueryDto) {
-    console.log({ queryDto });
     const findOptions: FindManyOptions<Notification> = {
       select: this.findOptionsSelect,
       skip: queryDto.offset,

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -82,6 +83,26 @@ export class NotificationsGatewayController {
         code: 200,
         success: true,
         data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Delete()
+  async deleteAll(@Req() req) {
+    try {
+      await firstValueFrom<unknown>(
+        this.notificationsClient.send(
+          'notification.delete_all',
+          req.auth?.userId,
+        ),
+      );
+
+      return new Response<unknown>({
+        code: 200,
+        success: true,
+        message: 'Deleted',
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
