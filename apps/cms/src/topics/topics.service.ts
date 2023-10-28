@@ -37,6 +37,14 @@ export class TopicsService {
     return res;
   }
 
+  async createMany(createTopicsDto: CreateTopicDto[], createdBy?: string) {
+    const topics = this.topicsRepository.create(
+      createTopicsDto.map((dto) => ({ ...dto, created_by: createdBy })),
+    );
+    const res = await this.topicsRepository.save(topics);
+    return res;
+  }
+
   async findAll(query: QueryDto) {
     const [data, total] = await Promise.all([
       this.topicsRepository.find({

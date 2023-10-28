@@ -30,6 +30,30 @@ export class TopicsController {
     }
   }
 
+  @MessagePattern('topic.create_many')
+  async createMany(
+    @Payload()
+    params: {
+      createTopicsDto: CreateTopicDto[];
+      createdBy?: string;
+    },
+  ) {
+    try {
+      const topic = await this.topicsService.createMany(
+        params.createTopicsDto,
+        params.createdBy,
+      );
+
+      return topic;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @MessagePattern('topic.find_all')
   async findAll(@Payload() query: QueryDto) {
     try {

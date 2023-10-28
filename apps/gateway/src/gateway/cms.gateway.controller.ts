@@ -68,6 +68,28 @@ export class CmsGatewayController {
     }
   }
 
+  @Post('/topics/many')
+  @Roles(Role.Admin)
+  async createTopics(@Req() req, @Body() createTopicsDto: CreateTopicDto[]) {
+    try {
+      const topic = await firstValueFrom<Topic[]>(
+        this.cmsClient.send('topic.create_many', {
+          createTopicsDto,
+          createdBy: req.auth?.userId,
+        }),
+      );
+
+      return new Response<Topic[]>({
+        code: 201,
+        success: true,
+        message: 'Created',
+        data: topic,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Patch('/topics/:id')
   @Roles(Role.Admin)
   async updateTopic(

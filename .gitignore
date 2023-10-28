@@ -6,3 +6,4 @@ dist
 *.log
 
 accountService.json
+http_ca.crt
