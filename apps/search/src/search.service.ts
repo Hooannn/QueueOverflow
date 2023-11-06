@@ -9,6 +9,14 @@ export class SearchService {
     return await this.elasticsearchService.search();
   }
 
+  async indexingDocuments(indexName: string, documents: any[]) {
+    const operations = documents.flatMap((doc) => [
+      { index: { _index: indexName, _id: doc.id ?? undefined } },
+      doc,
+    ]);
+    return await this.elasticsearchService.bulk({ refresh: true, operations });
+  }
+
   async createIndex(indexName: string) {
     return await this.elasticsearchService.indices.create({
       index: indexName,
@@ -28,10 +36,10 @@ export class SearchService {
     });
   }
 
-  async indexingDocument(indexName: string, documentId: string, document: any) {
+  async indexingDocument(indexName: string, document: any) {
     return await this.elasticsearchService.index({
       index: indexName,
-      id: documentId,
+      id: document.id ?? undefined,
       document: document,
     });
   }

@@ -8,7 +8,6 @@ services:
       target: development
     volumes:
       - ./apps/gateway:/app
-      - /app/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -23,7 +22,6 @@ services:
       target: development
     volumes:
       - ./apps/notifications:/app
-      - /app/node_modules
     ports:
       - "3001:3001"
     environment:
@@ -39,7 +37,6 @@ services:
       target: development
     volumes:
       - ./apps/users:/app
-      - /app/node_modules
     ports:
       - "3002:3002"
     environment:
@@ -53,7 +50,6 @@ services:
       target: development
     volumes:
       - ./apps/cms:/app
-      - /app/node_modules
     ports:
       - "3003:3003"
     environment:
@@ -67,9 +63,53 @@ services:
       target: development
     volumes:
       - ./apps/posts:/app
-      - /app/node_modules
     ports:
       - "3004:3004"
     environment:
       - NODE_ENV=development
       - PORT=3004
+
+  elasticsearch:
+    image: elasticsearch:8.10.2
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./data/es:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - queueoverflow
+
+  search:
+    build:
+      context: apps/search
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./apps/search:/app
+    depends_on:
+      - elasticsearch
+    networks:
+      - queueoverflow
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=vZCxp08vYfZTzFJO2P8y
+
+networks:
+  queueoverflow:
+    name: queueoverflow
+    external: true
+    driver: bridge
+
+volumes:
+  esdata:

@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateTopicDto,
@@ -15,8 +15,9 @@ export class TopicsService {
   constructor(
     @InjectRepository(Topic)
     private readonly topicsRepository: Repository<Topic>,
-
     @Inject('POSTS_SERVICE') private readonly postsClient: ClientProxy,
+    @Inject('SEARCH_SERVICE')
+    private readonly searchClient: ClientProxy,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<Topic> = {
@@ -34,6 +35,7 @@ export class TopicsService {
       created_by: createdBy,
     });
     const res = await this.topicsRepository.save(topic);
+    this.searchClient.emit('topic.created', [res]);
     return res;
   }
 
@@ -42,6 +44,7 @@ export class TopicsService {
       createTopicsDto.map((dto) => ({ ...dto, created_by: createdBy })),
     );
     const res = await this.topicsRepository.save(topics);
+    this.searchClient.emit('topic.created', res);
     return res;
   }
 
@@ -92,8 +95,9 @@ export class TopicsService {
       { id, created_by: updatedBy },
       updateTopicDto,
     );
-
-    return await this.findOne(id);
+    const updatedRecord = await this.findOne(id);
+    this.searchClient.emit('topic.updated', updatedRecord);
+    return updatedRecord;
   }
 
   async remove(id: string, removedBy?: string) {
@@ -101,6 +105,16 @@ export class TopicsService {
       id,
       created_by: removedBy,
     });
+
+    if (res.affected == 0) {
+      throw new RpcException({
+        message: 'Invalid request',
+        status: HttpStatus.CONFLICT,
+      });
+    }
+
+    this.searchClient.emit('topic.removed', id);
+
     return res;
   }
 }

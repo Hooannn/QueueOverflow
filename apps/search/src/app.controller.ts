@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -37,18 +38,34 @@ export class AppController {
     }
   }
 
+  @Delete('/index')
+  async deleteIndex(@Body('indexName') indexName: string) {
+    try {
+      return await this.searchService.deleteIndex(indexName);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Post('/indexing/document')
   async indexingDocument(
     @Body('indexName') indexName: string,
-    @Body('documentId') documentId: string,
     @Body('document') document: any,
   ) {
     try {
-      return await this.searchService.indexingDocument(
-        indexName,
-        documentId,
-        document,
-      );
+      return await this.searchService.indexingDocument(indexName, document);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('/indexing/documents')
+  async indexingDocuments(
+    @Body('indexName') indexName: string,
+    @Body('documents') documents: any[],
+  ) {
+    try {
+      return await this.searchService.indexingDocuments(indexName, documents);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }

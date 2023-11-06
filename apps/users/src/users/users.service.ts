@@ -22,6 +22,8 @@ export class UsersService {
     private readonly followsRepository: Repository<Follow>,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
+    @Inject('SEARCH_SERVICE')
+    private readonly searchClient: ClientProxy,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<User> = {
@@ -57,9 +59,13 @@ export class UsersService {
     const user = this.usersRepository.create(createUserDto);
     const res = await this.usersRepository.save(user);
     delete res.password;
+
     this.notificationsClient.emit('mail.send.welcome', {
       email: user.email,
     });
+
+    this.searchClient.emit('user.created', [res]);
+
     return res;
   }
 
@@ -236,11 +242,26 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto, updatedBy?: string) {
     await this.usersRepository.update(id, updateUserDto);
 
-    return await this.findOne(id);
+    const updatedUser = await this.findOne(id);
+
+    this.searchClient.emit('user.updated', updatedUser);
+
+    return updatedUser;
   }
 
   async remove(id: string) {
-    return await this.usersRepository.delete(id);
+    const res = await this.usersRepository.delete(id);
+
+    if (res.affected == 0) {
+      throw new RpcException({
+        message: 'Invalid request',
+        status: HttpStatus.CONFLICT,
+      });
+    }
+
+    this.searchClient.emit('user.removed', id);
+
+    return res;
   }
 
   async followUser(from_uid: string, to_uid: string) {

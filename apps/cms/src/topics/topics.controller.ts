@@ -39,12 +39,12 @@ export class TopicsController {
     },
   ) {
     try {
-      const topic = await this.topicsService.createMany(
+      const topics = await this.topicsService.createMany(
         params.createTopicsDto,
         params.createdBy,
       );
 
-      return topic;
+      return topics;
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({

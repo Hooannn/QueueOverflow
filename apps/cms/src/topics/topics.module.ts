@@ -20,6 +20,17 @@ import config from 'src/configs';
           },
         },
       },
+      {
+        name: 'SEARCH_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'search_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
   ],
   controllers: [TopicsController],

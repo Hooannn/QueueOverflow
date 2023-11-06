@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Repository,
@@ -13,6 +13,7 @@ import {
   QueryPostDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class PostsService {
@@ -20,9 +21,12 @@ export class PostsService {
     private dataSource: DataSource,
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
-
     @InjectRepository(PostVote)
     private readonly votesRepository: Repository<PostVote>,
+    @Inject('SEARCH_SERVICE')
+    private readonly searchClient: ClientProxy,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
   ) {}
 
   private userFindOptionsSelect: FindOptionsSelect<User> = {
@@ -68,6 +72,8 @@ export class PostsService {
       created_by: createdBy,
     });
     const res = await this.postsRepository.save(post);
+    this.searchClient.emit('post.created', [res]);
+    this.notificationsClient.emit('post.created', post.id);
     return res;
   }
 
@@ -130,8 +136,9 @@ export class PostsService {
       },
       updatePostDto,
     );
-
-    return await this.findOne(id);
+    const updatedRecord = await this.findOne(id);
+    this.searchClient.emit('post.updated', updatedRecord);
+    return updatedRecord;
   }
 
   async remove(id: string, removedBy?: string) {
@@ -139,6 +146,15 @@ export class PostsService {
       id,
       created_by: removedBy,
     });
+
+    if (res.affected == 0) {
+      throw new RpcException({
+        message: 'Invalid request',
+        status: HttpStatus.CONFLICT,
+      });
+    }
+
+    this.searchClient.emit('post.removed', id);
     return res;
   }
 
