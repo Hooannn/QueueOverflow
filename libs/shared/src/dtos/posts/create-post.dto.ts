@@ -1,13 +1,11 @@
 import {
   IsString,
-  IsEmail,
-  Length,
   IsBoolean,
-  ArrayMinSize,
   IsOptional,
-  IsNumber,
+  IsEnum,
   IsArray,
 } from "class-validator";
+import { PostType } from "../../entities";
 
 export class CreatePostDto {
   @IsString()
@@ -15,6 +13,9 @@ export class CreatePostDto {
 
   @IsString()
   content: string;
+
+  @IsEnum(PostType)
+  type: PostType;
 
   @IsOptional()
   @IsBoolean()

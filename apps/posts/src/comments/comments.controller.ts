@@ -1,20 +1,11 @@
-import { Controller, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import {
-  ClientProxy,
-  MessagePattern,
-  Payload,
-  RpcException,
-} from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
 
 @Controller()
 export class CommentsController {
-  constructor(
-    private readonly commentsService: CommentsService,
-    @Inject('NOTIFICATIONS_SERVICE')
-    private readonly notificationsClient: ClientProxy,
-  ) {}
+  constructor(private readonly commentsService: CommentsService) {}
 
   @MessagePattern('comment.find_by_id')
   async findOne(
@@ -41,17 +32,10 @@ export class CommentsController {
     },
   ) {
     try {
-      const comment = await this.commentsService.create(
+      return await this.commentsService.create(
         params.createCommentDto,
         params.userId,
       );
-
-      this.notificationsClient.emit('comment.created', {
-        postId: comment.post_id,
-        commentId: comment.id,
-      });
-
-      return comment;
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({

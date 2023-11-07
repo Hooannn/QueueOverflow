@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Inject,
   Param,
-  ParseArrayPipe,
   Patch,
   Post,
   Query,
@@ -22,7 +21,7 @@ import {
   ChangePasswordDto,
 } from '@queueoverflow/shared/dtos';
 import { Follow, Role, User } from '@queueoverflow/shared/entities';
-import { hashSync } from 'bcrypt';
+import { hashSync } from 'bcryptjs';
 import { firstValueFrom } from 'rxjs';
 import { Roles } from 'src/auth/auth.roles';
 import { Response } from '@queueoverflow/shared/utils';

@@ -44,7 +44,10 @@ export class Comment extends BaseEntity {
 
   @OneToMany(
     () => CommentVote,
-    (vote) => vote.comment
+    (vote) => vote.comment,
+    {
+      cascade: true,
+    }
   )
   @JoinColumn()
   votes: CommentVote[];

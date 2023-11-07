@@ -72,11 +72,10 @@ services:
   elasticsearch:
     image: elasticsearch:8.10.2
     environment:
-      - node.name=elasticsearch
-      - cluster.name=es-docker-cluster
-      - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - ELASTIC_PASSWORD=Y3KgattXgebGXUd
     volumes:
       - ./data/es:/usr/share/elasticsearch/data
     ports:
@@ -103,7 +102,7 @@ services:
       - PORT=3005
       - ELASTICSEARCH_NODE=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=vZCxp08vYfZTzFJO2P8y
+      - ELASTICSEARCH_PASSWORD=Y3KgattXgebGXUd
 
 networks:
   queueoverflow:

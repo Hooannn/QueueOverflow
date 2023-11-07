@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
 import { CommentVote, Comment, VoteType } from '@queueoverflow/shared/entities';
@@ -12,6 +13,9 @@ export class CommentsService {
 
     @InjectRepository(CommentVote)
     private readonly votesRepository: Repository<CommentVote>,
+
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
   ) {}
 
   private findOptionsSelect: FindOptionsSelect<Comment> = {
@@ -45,7 +49,14 @@ export class CommentsService {
       created_by: userId,
     });
 
-    return await this.commentsRepository.save(comment);
+    const savedComment = await this.commentsRepository.save(comment);
+
+    this.notificationsClient.emit('comment.created', {
+      postId: savedComment.post_id,
+      commentId: savedComment.id,
+    });
+
+    return savedComment;
   }
 
   async remove(commentId: string, userId: string) {

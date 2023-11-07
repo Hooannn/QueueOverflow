@@ -5,10 +5,10 @@
   "scripts": {
     "build:app": "docker-compose up --build",
     "start:app": "docker-compose up",
-    "start:elastic": "docker run --name queueoverflow_elasticsearch --net queueoverflow -p 9200:9200 -p 9300:9300 -it elasticsearch:8.10.2",
     "down:app": "docker-compose down",
-    "release:shared": "cd libs/shared && yarn install && yarn build && npm version patch && yarn publish:package",
-    "update:package": "node ./scripts/update-package"
+    "release:shared": "cd libs/shared && yarn build && yarn prepare:version && npm publish --access=public && cd ../..",
+    "update:package": "node ./scripts/update-package",
+    "install:package": "cd apps/cms && yarn && cd ../.. && cd apps/gateway && yarn && cd ../.. && cd apps/notifications && yarn && cd ../.. && cd apps/posts && yarn && cd ../.. && cd apps/search && yarn && cd ../.. && cd apps/users && yarn && cd ../.."
   },
   "repository": {
     "type": "git",

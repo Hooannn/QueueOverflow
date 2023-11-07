@@ -48,7 +48,7 @@ export class NotificationsWebsocketGateway
     );
 
     socketsToNotify.forEach((socket) =>
-      socket.emit('new-notification', {
+      socket.emit('notification:create', {
         uid: socket.handshake?.headers?.uid,
       }),
     );

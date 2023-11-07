@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { compareSync, hashSync } from 'bcrypt';
+import { compareSync, hashSync } from 'bcryptjs';
 import config from 'src/configs';
 import Redis from 'ioredis';
 import { InjectRepository } from '@nestjs/typeorm';

@@ -108,7 +108,6 @@ export class PostsService {
       total,
     };
   }
-
   async findOne(id: string) {
     const res = await this.postsRepository.findOne({
       select: this.findOptionsSelect,
@@ -125,6 +124,14 @@ export class PostsService {
         },
       },
     });
+
+    res.comments = res.comments
+      .sort(function (a, b) {
+        return (
+          (new Date(b.created_at) as any) - (new Date(a.created_at) as any)
+        );
+      })
+      .reverse();
     return res;
   }
 
@@ -205,9 +212,10 @@ export class PostsService {
   }
 
   async countByTopic(topicId: string) {
+    const repo = 'posts_topics';
     return await this.dataSource
-      .getRepository('posts_topics' as any)
-      .createQueryBuilder('posts_topics' as any)
+      .getRepository(repo)
+      .createQueryBuilder(repo)
       .select('topic_id')
       .where('topic_id = :topicId', { topicId })
       .getCount();

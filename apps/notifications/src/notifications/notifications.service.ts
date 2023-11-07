@@ -141,23 +141,26 @@ export class NotificationsService {
     }
   }
 
-  async notifyCommentCreated(postId: string, commendId: string) {
+  async notifyCommentCreated(postId: string, commentId: string) {
     try {
+      const [post, comment] = await Promise.all([
+        firstValueFrom<Post>(this.postsClient.send('post.find_by_id', postId)),
+        firstValueFrom<Comment>(
+          this.postsClient.send('comment.find_by_id', commentId),
+        ),
+      ]);
+
+      // Emit socket posts
       this.redisClient.publish(
         'posts',
         JSON.stringify({
           event: 'new-comment',
           token: config.SOCKET_EVENT_SECRET,
-          postId,
+          postId: post.id,
+          creatorId: comment.creator.id,
         }),
       );
 
-      const [post, comment] = await Promise.all([
-        firstValueFrom<Post>(this.postsClient.send('post.find_by_id', postId)),
-        firstValueFrom<Comment>(
-          this.postsClient.send('comment.find_by_id', commendId),
-        ),
-      ]);
       const uidsToNotify = [];
       const createNotificationsDto: InternalCreateNotificationDto[] = [];
 
@@ -203,7 +206,7 @@ export class NotificationsService {
 
       // Save notifications to db
       await this.createMultiple(createNotificationsDto);
-      // Emit socket events
+      // Emit socket notifications
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
@@ -308,7 +311,7 @@ export class NotificationsService {
   }
 
   private getUserName(user: User) {
-    if (!user.first_name && !user.last_name) return user.email;
+    if (!user.first_name && !user.last_name) return `User ${user.id}`;
     return `${user.first_name} ${user.last_name}`;
   }
 

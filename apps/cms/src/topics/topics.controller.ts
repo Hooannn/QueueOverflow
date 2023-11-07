@@ -83,6 +83,19 @@ export class TopicsController {
     }
   }
 
+  @MessagePattern('topic.search')
+  async search(@Payload() params: { q: string }) {
+    try {
+      return await this.topicsService.search(params);
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @MessagePattern('topic.update')
   async update(
     @Payload()
@@ -115,6 +128,20 @@ export class TopicsController {
       await this.topicsService.remove(params.id, params.removedBy);
       return params.id;
     } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
+  @MessagePattern('topic.remove_all')
+  async removeAll() {
+    try {
+      return await this.topicsService.removeAll();
+    } catch (error) {
+      console.log(error);
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
         message: e?.message || 'Invalid request',

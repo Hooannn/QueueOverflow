@@ -1,11 +1,14 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PinoLogger } from 'nestjs-pino';
 import config from 'src/configs';
 import { Inject } from '@nestjs/common';
@@ -35,36 +38,42 @@ export class PostsWebsocketGateway
   @WebSocketServer()
   server: Server;
 
-  async handleNewComment(payload: { token: string; postId: string }) {
+  async handleNewComment(payload: {
+    token: string;
+    postId: string;
+    creatorId: string;
+  }) {
     const secretKey = config.SOCKET_EVENT_SECRET;
     const token = payload.token;
     if (token !== secretKey) return;
     const postId = payload.postId;
+    // TODO: debug with frontend client
+    this.server.to(`post:${postId}`).emit('comment:create', {
+      creatorId: payload.creatorId,
+    });
+  }
 
-    const serverSockets = await this.server.fetchSockets();
+  @SubscribeMessage('subscribe')
+  onClientSubscribe(
+    @MessageBody() postId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(`post:${postId}`);
 
-    const socketsToNotify = serverSockets.filter(
-      (socket) => socket.handshake?.headers?.postId === postId,
-    );
-
-    socketsToNotify.forEach((socket) =>
-      socket.emit('new-comment', {
-        postId: socket.handshake?.headers?.postId,
-      }),
-    );
+    client.on('disconnect', () => {
+      client.leave(`post:${postId}`);
+    });
   }
 
   afterInit(server: Server) {
-    this.logger.info('Notifications websocket gateway initialized');
+    this.logger.info('posts websocket gateway initialized');
   }
 
   handleConnection(client: any, ...args: any[]) {
-    this.logger.info('New client connected to notifications websocket gateway');
+    this.logger.info('New client connected to posts websocket gateway');
   }
 
   handleDisconnect(client: any) {
-    this.logger.info(
-      'Client disconnected from notifications websocket gateway',
-    );
+    this.logger.info('Client disconnected from posts websocket gateway');
   }
 }

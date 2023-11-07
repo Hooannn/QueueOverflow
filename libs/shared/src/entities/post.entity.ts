@@ -3,16 +3,20 @@ import {
   Entity,
   Column,
   ManyToMany,
-  RelationId,
   JoinTable,
   OneToMany,
   JoinColumn,
 } from "typeorm";
 
+export enum PostType {
+  Post = "post",
+  Media = "media",
+  Poll = "poll",
+}
 @Entity("posts")
 export class Post extends BaseEntity {
   @Column({
-    length: 50,
+    type: "text",
   })
   title: string;
 
@@ -20,6 +24,12 @@ export class Post extends BaseEntity {
     type: "text",
   })
   content: string;
+
+  @Column({
+    type: "enum",
+    enum: PostType,
+  })
+  type: PostType;
 
   @Column({
     type: "text",

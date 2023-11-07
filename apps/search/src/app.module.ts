@@ -6,6 +6,7 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { SearchService } from './search.service';
 import * as fs from 'fs';
 import { SyncController } from './sync.controller';
+import { SearchController } from './search.controller';
 @Module({
   imports: [
     ElasticsearchModule.register({
@@ -28,7 +29,7 @@ import { SyncController } from './sync.controller';
       },
     }),
   ],
-  controllers: [AppController, SyncController],
+  controllers: [AppController, SyncController, SearchController],
   providers: [SearchService],
 })
 export class AppModule {}

@@ -39,6 +39,13 @@ export class TopicsService {
     return res;
   }
 
+  async search(params: { q: string }) {
+    const documents = await firstValueFrom(
+      this.searchClient.send('topic.search', params),
+    );
+    return documents;
+  }
+
   async createMany(createTopicsDto: CreateTopicDto[], createdBy?: string) {
     const topics = this.topicsRepository.create(
       createTopicsDto.map((dto) => ({ ...dto, created_by: createdBy })),
@@ -116,5 +123,11 @@ export class TopicsService {
     this.searchClient.emit('topic.removed', id);
 
     return res;
+  }
+
+  async removeAll() {
+    await this.topicsRepository.createQueryBuilder().delete().execute();
+
+    return true;
   }
 }

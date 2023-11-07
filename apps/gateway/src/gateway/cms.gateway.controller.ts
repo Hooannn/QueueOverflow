@@ -12,7 +12,6 @@ import {
   Get,
   Delete,
   ParseArrayPipe,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -173,6 +172,24 @@ export class CmsGatewayController {
         code: 200,
         success: true,
         data: { id: removedId },
+        message: 'Deleted',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Delete('/topics')
+  @Roles(Role.Admin)
+  async removeAll() {
+    try {
+      const res = await firstValueFrom<boolean>(
+        this.cmsClient.send('topic.remove_all', {}),
+      );
+
+      return new Response<{ id: string }>({
+        code: 200,
+        success: res,
         message: 'Deleted',
       });
     } catch (error) {
