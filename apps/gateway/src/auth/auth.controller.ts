@@ -23,6 +23,14 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
+interface AuthenResponse {
+  user: User;
+  credentials: {
+    access_token: string;
+    refresh_token: string;
+  };
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -65,7 +73,7 @@ export class AuthController {
     const res = await this.authService.performAuthenWithGithubProvider(
       githubAuthDto.code,
     );
-    return new Response<any>({
+    return new Response<AuthenResponse>({
       code: 200,
       success: true,
       data: res,
@@ -89,7 +97,7 @@ export class AuthController {
   @Post('sign-in/renew-password')
   async signInWithRenewPassword(@Body() signInDto: SignInDto) {
     const res = await this.authService.signInWithRenewPassword(signInDto);
-    return new Response<any>({
+    return new Response<AuthenResponse>({
       code: 200,
       success: true,
       data: res,
@@ -101,7 +109,7 @@ export class AuthController {
   @Post('sign-up')
   async signUp(@Body() signUpDto: SignUpDto) {
     const res = await this.authService.signUp(signUpDto);
-    return new Response<any>({
+    return new Response<AuthenResponse>({
       code: 201,
       success: true,
       data: res,
@@ -124,7 +132,7 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Body() refreshDto: RefreshDto) {
     const res = await this.authService.refresh(refreshDto);
-    return new Response<any>({
+    return new Response<Pick<AuthenResponse, 'credentials'>>({
       code: 200,
       success: true,
       data: res,

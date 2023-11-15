@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
 import { CommentVote, Comment, VoteType } from '@queueoverflow/shared/entities';
@@ -60,10 +60,27 @@ export class CommentsService {
   }
 
   async remove(commentId: string, userId: string) {
-    return await this.commentsRepository.delete({
+    const comment = await this.commentsRepository.findOne({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      throw new RpcException({
+        message: 'Invalid request',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const res = await this.commentsRepository.delete({
       created_by: userId,
       id: commentId,
     });
+
+    this.notificationsClient.emit('comment.removed', {
+      postId: comment.post_id,
+      commentId: comment.id,
+    });
+    return res;
   }
 
   async update(
@@ -75,8 +92,14 @@ export class CommentsService {
       { id: commentId, created_by: userId },
       updateCommentDto,
     );
-
-    return await this.commentsRepository.findOne({ where: { id: commentId } });
+    const comment = await this.commentsRepository.findOne({
+      where: { id: commentId },
+    });
+    this.notificationsClient.emit('comment.updated', {
+      postId: comment.post_id,
+      commentId: comment.id,
+    });
+    return comment;
   }
 
   async upvote(commentId: string, userId: string) {

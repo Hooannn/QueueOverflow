@@ -67,6 +67,8 @@ export class PushNotificationsService {
       token,
     }));
 
+    if (!messages.length) return;
+
     return await this.messagingClient.sendEach(messages);
   }
 }

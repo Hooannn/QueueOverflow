@@ -47,7 +47,7 @@ export class PostsWebsocketGateway
     const token = payload.token;
     if (token !== secretKey) return;
     const postId = payload.postId;
-    // TODO: debug with frontend client
+
     this.server.to(`post:${postId}`).emit('comment:create', {
       creatorId: payload.creatorId,
     });
