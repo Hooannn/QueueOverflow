@@ -79,6 +79,7 @@ export class CommentsService {
     this.notificationsClient.emit('comment.removed', {
       postId: comment.post_id,
       commentId: comment.id,
+      userId,
     });
     return res;
   }
@@ -98,53 +99,81 @@ export class CommentsService {
     this.notificationsClient.emit('comment.updated', {
       postId: comment.post_id,
       commentId: comment.id,
+      userId,
     });
     return comment;
   }
 
-  async upvote(commentId: string, userId: string) {
+  async upvote(commentId: string, postId: string, userId: string) {
     const existingVote = await this.votesRepository.findOne({
       where: { uid: userId, comment_id: commentId, type: VoteType.Up },
     });
 
-    if (existingVote) return await this.removeUpvote(commentId, userId);
+    if (existingVote) return await this.removeUpvote(commentId, postId, userId);
 
     const newVote = this.votesRepository.create({
       uid: userId,
       comment_id: commentId,
       type: VoteType.Up,
     });
-    return await this.votesRepository.save(newVote);
+
+    const savedVote = await this.votesRepository.save(newVote);
+    this.notificationsClient.emit('comment.updated', {
+      postId: postId,
+      commentId: commentId,
+      userId,
+    });
+    return savedVote;
   }
 
-  async removeUpvote(commentId: string, userId: string) {
-    return await this.votesRepository.delete({
+  async removeUpvote(commentId: string, postId: string, userId: string) {
+    const res = await this.votesRepository.delete({
       uid: userId,
       comment_id: commentId,
       type: VoteType.Up,
     });
+    this.notificationsClient.emit('comment.updated', {
+      postId: postId,
+      commentId: commentId,
+      userId,
+    });
+    return res;
   }
 
-  async downvote(commentId: string, userId: string) {
+  async downvote(commentId: string, postId: string, userId: string) {
     const existingVote = await this.votesRepository.findOne({
       where: { uid: userId, comment_id: commentId, type: VoteType.Down },
     });
 
-    if (existingVote) return await this.removeDownvote(commentId, userId);
+    if (existingVote)
+      return await this.removeDownvote(commentId, postId, userId);
 
     const newVote = this.votesRepository.create({
       uid: userId,
       comment_id: commentId,
       type: VoteType.Down,
     });
-    return await this.votesRepository.save(newVote);
+
+    const savedVote = await this.votesRepository.save(newVote);
+    this.notificationsClient.emit('comment.updated', {
+      postId: postId,
+      commentId: commentId,
+      userId,
+    });
+    return savedVote;
   }
 
-  async removeDownvote(commentId: string, userId: string) {
-    return await this.votesRepository.delete({
+  async removeDownvote(commentId: string, postId: string, userId: string) {
+    const res = await this.votesRepository.delete({
       uid: userId,
       comment_id: commentId,
       type: VoteType.Down,
     });
+    this.notificationsClient.emit('comment.updated', {
+      postId: postId,
+      commentId: commentId,
+      userId,
+    });
+    return res;
   }
 }

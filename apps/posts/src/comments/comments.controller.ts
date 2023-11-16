@@ -93,11 +93,16 @@ export class CommentsController {
     @Payload()
     params: {
       commentId: string;
+      postId: string;
       userId: string;
     },
   ) {
     try {
-      return await this.commentsService.upvote(params.commentId, params.userId);
+      return await this.commentsService.upvote(
+        params.commentId,
+        params.postId,
+        params.userId,
+      );
     } catch (error) {
       const e = error instanceof RpcException ? error.getError() : error;
       throw new RpcException({
@@ -112,12 +117,14 @@ export class CommentsController {
     @Payload()
     params: {
       commentId: string;
+      postId: string;
       userId: string;
     },
   ) {
     try {
       return await this.commentsService.removeUpvote(
         params.commentId,
+        params.postId,
         params.userId,
       );
     } catch (error) {
@@ -134,12 +141,14 @@ export class CommentsController {
     @Payload()
     params: {
       commentId: string;
+      postId: string;
       userId: string;
     },
   ) {
     try {
       return await this.commentsService.downvote(
         params.commentId,
+        params.postId,
         params.userId,
       );
     } catch (error) {
@@ -156,12 +165,14 @@ export class CommentsController {
     @Payload()
     params: {
       commentId: string;
+      postId: string;
       userId: string;
     },
   ) {
     try {
       return await this.commentsService.removeDownvote(
         params.commentId,
+        params.postId,
         params.userId,
       );
     } catch (error) {

@@ -15,6 +15,7 @@ import { WebsocketModule } from './websocket/module';
 import { NotificationsGatewayController } from './gateway/notifications.gateway.controller';
 import { CommentsGatewayController } from './gateway/comments.gateway.controller';
 import { SearchGatewayController } from './gateway/search.gateway.controller';
+import { SavedPostsGatewayController } from './gateway/saved_posts.gateway.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -88,6 +89,7 @@ import { SearchGatewayController } from './gateway/search.gateway.controller';
     NotificationsGatewayController,
     CommentsGatewayController,
     SearchGatewayController,
+    SavedPostsGatewayController,
   ],
   providers: [
     {

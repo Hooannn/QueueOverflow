@@ -7,6 +7,7 @@ import { RedisModule } from './redis/redis.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { Topic, User } from '@queueoverflow/shared/entities';
+import { SavedPostsModule } from './saved_posts/saved_posts.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -33,6 +34,7 @@ import { Topic, User } from '@queueoverflow/shared/entities';
     RedisModule,
     PostsModule,
     CommentsModule,
+    SavedPostsModule,
   ],
   controllers: [AppController],
 })

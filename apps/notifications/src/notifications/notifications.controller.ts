@@ -77,6 +77,30 @@ export class NotificationsController {
     );
   }
 
+  @EventPattern('comment.removed')
+  async notifyCommentRemoved(
+    @Payload() params: { postId: string; commentId: string; userId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyCommentRemoved(
+      params.postId,
+      params.commentId,
+      params.userId,
+    );
+  }
+
+  @EventPattern('comment.updated')
+  async notifyCommentUpdated(
+    @Payload() params: { postId: string; commentId: string; userId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyCommentUpdated(
+      params.postId,
+      params.commentId,
+      params.userId,
+    );
+  }
+
   @MessagePattern('fcm_token.create')
   async createFcmToken(
     @Payload()

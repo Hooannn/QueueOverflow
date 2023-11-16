@@ -27,12 +27,17 @@ export class CommentsGatewayController {
     private readonly postsClient: ClientProxy,
   ) {}
 
-  @Post('upvote/:id')
-  async upvote(@Param('id') id: string, @Req() req) {
+  @Post('upvote/:commentId/post/:postId')
+  async upvote(
+    @Param('commentId') commentId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
     try {
       await firstValueFrom<unknown>(
         this.postsClient.send('comment.upvote.create', {
-          commentId: id,
+          commentId,
+          postId,
           userId: req.auth?.userId,
         }),
       );
@@ -47,12 +52,17 @@ export class CommentsGatewayController {
     }
   }
 
-  @Delete('upvote/:id')
-  async removeUpvote(@Param('id') id: string, @Req() req) {
+  @Delete('upvote/:commentId/post/:postId')
+  async removeUpvote(
+    @Param('commentId') commentId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
     try {
       await firstValueFrom<unknown>(
         this.postsClient.send('comment.upvote.remove', {
-          commentId: id,
+          commentId,
+          postId,
           userId: req.auth?.userId,
         }),
       );
@@ -67,12 +77,17 @@ export class CommentsGatewayController {
     }
   }
 
-  @Post('downvote/:id')
-  async downvote(@Param('id') id: string, @Req() req) {
+  @Post('downvote/:commentId/post/:postId')
+  async downvote(
+    @Param('commentId') commentId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
     try {
       await firstValueFrom<unknown>(
         this.postsClient.send('comment.downvote.create', {
-          commentId: id,
+          commentId,
+          postId,
           userId: req.auth?.userId,
         }),
       );
@@ -87,12 +102,17 @@ export class CommentsGatewayController {
     }
   }
 
-  @Delete('downvote/:id')
-  async removeDownvote(@Param('id') id: string, @Req() req) {
+  @Delete('downvote/:commentId/post/:postId')
+  async removeDownvote(
+    @Param('commentId') commentId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
     try {
       await firstValueFrom<unknown>(
         this.postsClient.send('comment.downvote.remove', {
-          commentId: id,
+          commentId,
+          postId,
           userId: req.auth?.userId,
         }),
       );

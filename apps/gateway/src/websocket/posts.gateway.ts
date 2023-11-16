@@ -31,25 +31,26 @@ export class PostsWebsocketGateway
     this.redisSubscriberClient.on('message', (ch, message) => {
       if (ch === 'posts') {
         const data = JSON.parse(message);
-        if (data.event === 'new-comment') this.handleNewComment(data);
+        this.notify(data);
       }
     });
   }
   @WebSocketServer()
   server: Server;
 
-  async handleNewComment(payload: {
+  async notify(payload: {
     token: string;
     postId: string;
     creatorId: string;
+    commentId: string;
+    event: string;
   }) {
     const secretKey = config.SOCKET_EVENT_SECRET;
-    const token = payload.token;
-    if (token !== secretKey) return;
-    const postId = payload.postId;
+    if (payload.token !== secretKey) return;
 
-    this.server.to(`post:${postId}`).emit('comment:create', {
+    this.server.to(`post:${payload.postId}`).emit(payload.event, {
       creatorId: payload.creatorId,
+      commentId: payload.commentId,
     });
   }
 

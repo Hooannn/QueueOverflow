@@ -126,7 +126,7 @@ export class NotificationsService {
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
-          event: 'new-notification',
+          event: 'notification:created',
           token: config.SOCKET_EVENT_SECRET,
           uids: uidsToNotify,
         }),
@@ -154,8 +154,9 @@ export class NotificationsService {
       this.redisClient.publish(
         'posts',
         JSON.stringify({
-          event: 'new-comment',
+          event: 'comment:created',
           token: config.SOCKET_EVENT_SECRET,
+          commentId,
           postId: post.id,
           creatorId: comment.creator.id,
         }),
@@ -210,7 +211,7 @@ export class NotificationsService {
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
-          event: 'new-notification',
+          event: 'notification:created',
           token: config.SOCKET_EVENT_SECRET,
           uids: uidsToNotify,
         }),
@@ -221,6 +222,40 @@ export class NotificationsService {
         JSON.stringify(error),
       );
     }
+  }
+
+  async notifyCommentRemoved(
+    postId: string,
+    commentId: string,
+    userId: string,
+  ) {
+    this.redisClient.publish(
+      'posts',
+      JSON.stringify({
+        event: 'comment:removed',
+        token: config.SOCKET_EVENT_SECRET,
+        postId: postId,
+        commentId: commentId,
+        creatorId: userId,
+      }),
+    );
+  }
+
+  async notifyCommentUpdated(
+    postId: string,
+    commentId: string,
+    userId: string,
+  ) {
+    this.redisClient.publish(
+      'posts',
+      JSON.stringify({
+        event: 'comment:updated',
+        token: config.SOCKET_EVENT_SECRET,
+        postId: postId,
+        commentId: commentId,
+        creatorId: userId,
+      }),
+    );
   }
 
   async notifyUserFollowed(from_uid: string, to_uid: string) {
@@ -246,7 +281,7 @@ export class NotificationsService {
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
-          event: 'new-notification',
+          event: 'notification:created',
           token: config.SOCKET_EVENT_SECRET,
           uids: uidsToNotify,
         }),
@@ -284,7 +319,7 @@ export class NotificationsService {
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
-          event: 'new-notification',
+          event: 'notification:created',
           token: config.SOCKET_EVENT_SECRET,
           uids: uidsToNotify,
         }),

@@ -28,14 +28,14 @@ export class NotificationsWebsocketGateway
     this.redisSubscriberClient.on('message', (ch, message) => {
       if (ch === 'notifications') {
         const data = JSON.parse(message);
-        if (data.event === 'new-notification') this.handleNewNotification(data);
+        if (data.event === 'notification:created') this.notify(data);
       }
     });
   }
   @WebSocketServer()
   server: Server;
 
-  async handleNewNotification(payload: { token: string; uids: string[] }) {
+  async notify(payload: { token: string; uids: string[]; event: string }) {
     const secretKey = config.SOCKET_EVENT_SECRET;
     const token = payload.token;
     if (token !== secretKey) return;
@@ -48,7 +48,7 @@ export class NotificationsWebsocketGateway
     );
 
     socketsToNotify.forEach((socket) =>
-      socket.emit('notification:create', {
+      socket.emit(payload.event, {
         uid: socket.handshake?.headers?.uid,
       }),
     );
