@@ -34,6 +34,8 @@ export class UsersService {
     roles: true,
     avatar: true,
     meta_data: true,
+    bio: true,
+    urls: true,
   };
 
   async checkUser(params: { email: string }) {

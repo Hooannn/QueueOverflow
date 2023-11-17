@@ -28,8 +28,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           },
         },
       },
-    ]),
-    ClientsModule.register([
       {
         name: 'USERS_SERVICE',
         transport: Transport.RMQ,

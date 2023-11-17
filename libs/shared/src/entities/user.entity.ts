@@ -61,6 +61,17 @@ export class User {
   password: string;
 
   @Column({
+    nullable: true,
+  })
+  bio?: string;
+
+  @Column({
+    type: "jsonb",
+    nullable: true,
+  })
+  urls?: any[];
+
+  @Column({
     type: "jsonb",
     nullable: true,
   })

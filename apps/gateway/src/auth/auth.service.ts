@@ -130,13 +130,15 @@ export class AuthService {
         user.roles,
       );
 
-      this.usersClient.send('user.update', {
-        userId: user.id,
-        updateUserDto: {
-          password: newHashedPassword,
-        },
-        updatedBy: user.id,
-      });
+      await firstValueFrom<User>(
+        this.usersClient.send('user.update', {
+          userId: user.id,
+          updateUserDto: {
+            password: newHashedPassword,
+          },
+          updatedBy: user.id,
+        }),
+      );
 
       return { user, credentials: { access_token, refresh_token } };
     } catch (error) {

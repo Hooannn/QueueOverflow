@@ -4,6 +4,7 @@ import {
   Length,
   ArrayMinSize,
   IsOptional,
+  IsArray,
 } from "class-validator";
 import { Role } from "../../entities/user.entity";
 
@@ -28,6 +29,14 @@ export class CreateUserDto {
   @IsOptional()
   @ArrayMinSize(1)
   roles?: Role[];
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsArray()
+  urls?: any[];
 
   @IsOptional()
   meta_data?: any;
