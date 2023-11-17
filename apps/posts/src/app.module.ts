@@ -8,6 +8,7 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { Topic, User } from '@queueoverflow/shared/entities';
 import { SavedPostsModule } from './saved_posts/saved_posts.module';
+import { PostSubscriptionsModule } from './post_subscriptions/post_subscriptions.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -35,6 +36,7 @@ import { SavedPostsModule } from './saved_posts/saved_posts.module';
     PostsModule,
     CommentsModule,
     SavedPostsModule,
+    PostSubscriptionsModule,
   ],
   controllers: [AppController],
 })

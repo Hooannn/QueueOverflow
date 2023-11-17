@@ -12,3 +12,4 @@ export * from "./post_vote.entity";
 export * from "./base.vote.entity";
 export * from "./comment_vote.entity";
 export * from "./saved_post.entity";
+export * from "./post_subscription.entity";

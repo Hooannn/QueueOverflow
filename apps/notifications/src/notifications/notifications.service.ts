@@ -9,6 +9,7 @@ import {
   Subscription,
   User,
   Comment,
+  PostSubscription,
 } from '@queueoverflow/shared/entities';
 import { CreateNotificationDto, QueryDto } from '@queueoverflow/shared/dtos';
 import { firstValueFrom } from 'rxjs';
@@ -120,9 +121,7 @@ export class NotificationsService {
           ...notificationBody,
         }));
 
-      // Save notifications to db
       await this.createMultiple(createNotificationsDto);
-      // Emit socket events
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
@@ -131,7 +130,6 @@ export class NotificationsService {
           uids: uidsToNotify,
         }),
       );
-      // Push notifications
       this.pushNotificationsService.push(uidsToNotify, notificationBody);
     } catch (error) {
       this.logger.error(
@@ -143,14 +141,16 @@ export class NotificationsService {
 
   async notifyCommentCreated(postId: string, commentId: string) {
     try {
-      const [post, comment] = await Promise.all([
+      const [post, comment, postSubscriptions] = await Promise.all([
         firstValueFrom<Post>(this.postsClient.send('post.find_by_id', postId)),
         firstValueFrom<Comment>(
           this.postsClient.send('comment.find_by_id', commentId),
         ),
+        firstValueFrom<PostSubscription[]>(
+          this.postsClient.send('post_subscription.find_by_post_id', postId),
+        ),
       ]);
 
-      // Emit socket posts
       this.redisClient.publish(
         'posts',
         JSON.stringify({
@@ -165,6 +165,7 @@ export class NotificationsService {
       const uidsToNotify = [];
       const createNotificationsDto: InternalCreateNotificationDto[] = [];
 
+      // Notify to owner of post
       if (post.created_by !== comment.created_by) {
         uidsToNotify.push(post.created_by);
         const notificationBody = {
@@ -178,10 +179,35 @@ export class NotificationsService {
           ...notificationBody,
         });
 
-        // Push notifications
         this.pushNotificationsService.push([post.created_by], notificationBody);
       }
 
+      // Notify to subscribers of post except the owner of post and comment
+      const filteredSubscriptions = postSubscriptions.filter(
+        (sub) => sub.uid !== post.created_by && sub.uid !== comment.created_by,
+      );
+      if (filteredSubscriptions.length) {
+        const notificationBody = {
+          title: `${this.getUserName(comment.creator)} commented to '${
+            post.title
+          }'`,
+          content: comment.content,
+        };
+        filteredSubscriptions.forEach((sub) => {
+          createNotificationsDto.push({
+            recipient_id: sub.uid,
+            created_by: comment.created_by,
+            ...notificationBody,
+          });
+          uidsToNotify.push(sub.uid);
+        });
+        this.pushNotificationsService.push(
+          filteredSubscriptions.map((sub) => sub.uid),
+          notificationBody,
+        );
+      }
+
+      // Notify to owner of comment
       if (
         comment.parent_id &&
         comment.parent?.created_by &&
@@ -198,16 +224,13 @@ export class NotificationsService {
           ...notificationBody,
         });
 
-        // Push notifications
         this.pushNotificationsService.push(
           [comment.parent?.created_by],
           notificationBody,
         );
       }
 
-      // Save notifications to db
       await this.createMultiple(createNotificationsDto);
-      // Emit socket notifications
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
@@ -275,9 +298,7 @@ export class NotificationsService {
         ...notificationBody,
       };
 
-      // Save notifications to db
       await this.create(createNotificationDto);
-      // Emit socket events
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
@@ -286,7 +307,6 @@ export class NotificationsService {
           uids: uidsToNotify,
         }),
       );
-      // Push notifications
       this.pushNotificationsService.push(uidsToNotify, notificationBody);
     } catch (error) {
       this.logger.error(
@@ -313,9 +333,7 @@ export class NotificationsService {
         ...notificationBody,
       };
 
-      // Save notifications to db
       await this.create(createNotificationDto);
-      // Emit socket events
       this.redisClient.publish(
         'notifications',
         JSON.stringify({
@@ -324,7 +342,6 @@ export class NotificationsService {
           uids: uidsToNotify,
         }),
       );
-      // Push notifications
       this.pushNotificationsService.push(uidsToNotify, notificationBody);
     } catch (error) {
       this.logger.error(
