@@ -10,9 +10,15 @@ import {
   Post,
   Delete,
   Get,
+  Query,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
+import {
+  CreateCommentDto,
+  QueryDto,
+  UpdateCommentDto,
+} from '@queueoverflow/shared/dtos';
 import { Comment } from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
 import { Response } from '@queueoverflow/shared/utils';
@@ -145,6 +151,66 @@ export class CommentsGatewayController {
         success: true,
         data: comment,
         message: 'Created',
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('my_own')
+  async findMyOwn(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: Comment[];
+        total?: number;
+      }>(
+        this.postsClient.send('comment.find_all_by_uid', {
+          queryDto: { ...queryDto, relations },
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<Comment[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('user/:userId')
+  async findUserComments(
+    @Param('userId') userId: string,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: Comment[];
+        total?: number;
+      }>(
+        this.postsClient.send('comment.find_all_by_uid', {
+          queryDto: { ...queryDto, relations },
+          userId,
+        }),
+      );
+
+      return new Response<Comment[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data,
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

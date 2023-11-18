@@ -1,9 +1,13 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
+import {
+  CreateCommentDto,
+  QueryDto,
+  UpdateCommentDto,
+} from '@queueoverflow/shared/dtos';
 import { CommentVote, Comment, VoteType } from '@queueoverflow/shared/entities';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsSelect, Repository } from 'typeorm';
 
 @Injectable()
 export class CommentsService {
@@ -30,6 +34,35 @@ export class CommentsService {
       type: true,
     },
   };
+
+  async findAllByUid(query: QueryDto, userId: string) {
+    const findOptions: FindManyOptions<Comment> = {
+      select: this.findOptionsSelect,
+      where: {
+        created_by: userId,
+      },
+      skip: query.offset,
+      take: query.limit,
+      relations: (query as any).relations ?? [],
+      order: {
+        updated_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<Comment> = {
+      where: { created_by: userId },
+      select: { id: true },
+    };
+
+    const [data, total] = await Promise.all([
+      this.commentsRepository.find(findOptions),
+      this.commentsRepository.count(countOptions),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
 
   async findOne(commentId: string) {
     return await this.commentsRepository.findOne({

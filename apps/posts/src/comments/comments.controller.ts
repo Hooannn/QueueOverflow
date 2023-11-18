@@ -1,11 +1,39 @@
 import { Controller, HttpStatus } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { CreateCommentDto, UpdateCommentDto } from '@queueoverflow/shared/dtos';
+import {
+  CreateCommentDto,
+  QueryDto,
+  UpdateCommentDto,
+} from '@queueoverflow/shared/dtos';
 
 @Controller()
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
+
+  @MessagePattern('comment.find_all_by_uid')
+  async findAllByUid(
+    @Payload()
+    params: {
+      queryDto: QueryDto;
+      userId: string;
+    },
+  ) {
+    try {
+      const { data, total } = await this.commentsService.findAllByUid(
+        params.queryDto,
+        params.userId,
+      );
+
+      return { data, total };
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
 
   @MessagePattern('comment.find_by_id')
   async findOne(

@@ -1,238 +1,478 @@
 [
-    {
-        "title": "Machine Learning",
-        "description": "Explore the world of machine learning and artificial intelligence."
-    },
-    {
-        "title": "Web Development",
-        "description": "Discuss web technologies, frameworks, and best practices."
-    },
-    {
-        "title": "Mobile App Development",
-        "description": "Learn about mobile app development for iOS and Android platforms."
-    },
-    {
-        "title": "Data Science",
-        "description": "Discover data analysis, visualization, and data-driven insights."
-    },
-    {
-        "title": "Cloud Computing",
-        "description": "Explore cloud services and infrastructure for scalable applications."
-    },
-    {
-        "title": "Cybersecurity",
-        "description": "Discuss strategies and techniques for protecting digital assets."
-    },
-    {
-        "title": "Artificial Intelligence Ethics",
-        "description": "Explore the ethical implications of AI and machine learning."
-    },
-    {
-        "title": "IoT (Internet of Things)",
-        "description": "Learn about IoT devices, applications, and security."
-    },
-    {
-        "title": "Blockchain Technology",
-        "description": "Discuss decentralized ledgers and cryptocurrency technologies."
-    },
-    {
-        "title": "Software Development Methodologies",
-        "description": "Explore Agile, Scrum, and other development methodologies."
-    },
-    {
-        "title": "DevOps Practices",
-        "description": "Discuss DevOps principles for software development and operations."
-    },
-    {
-        "title": "Big Data Analytics",
-        "description": "Learn about processing and analyzing large datasets."
-    },
-    {
-        "title": "Python Programming",
-        "description": "Discuss Python language features, libraries, and frameworks."
-    },
-    {
-        "title": "JavaScript Development",
-        "description": "Explore JavaScript, ES6, and modern web development."
-    },
-    {
-        "title": "Cloud Security",
-        "description": "Discuss strategies for securing data in the cloud."
-    },
-    {
-        "title": "Frontend Frameworks",
-        "description": "Learn about popular frontend frameworks like React and Angular."
-    },
-    {
-        "title": "Backend Development",
-        "description": "Explore server-side technologies and API development."
-    },
-    {
-        "title": "Database Management",
-        "description": "Discuss SQL, NoSQL, and database design."
-    },
-    {
-        "title": "UI/UX Design",
-        "description": "Explore user interface and user experience design principles."
-    },
-    {
-        "title": "Artificial Neural Networks",
-        "description": "Learn about deep learning and neural network architectures."
-    },
-    {
-        "title": "Virtual Reality (VR)",
-        "description": "Discuss VR technologies and applications."
-    },
-    {
-        "title": "5G and Networking",
-        "description": "Explore the latest advancements in networking and 5G technology."
-    },
-    {
-        "title": "Robotics and Automation",
-        "description": "Learn about robotics and automation in various industries."
-    },
-    {
-        "title": "Biotechnology",
-        "description": "Discuss the intersection of biology and technology."
-    },
-    {
-        "title": "Cyber Threat Intelligence",
-        "description": "Explore the latest threats and intelligence in cybersecurity."
-    },
-    {
-        "title": "Data Privacy",
-        "description": "Discuss data protection and privacy regulations."
-    },
-    {
-        "title": "Cloud-Native Applications",
-        "description": "Explore building and deploying cloud-native applications."
-    },
-    {
-        "title": "AR (Augmented Reality)",
-        "description": "Learn about AR technologies and applications."
-    },
-    {
-        "title": "Edge Computing",
-        "description": "Discuss processing data closer to its source for low latency."
-    },
-    {
-        "title": "Quantum Computing",
-        "description": "Explore quantum computing and its potential impact."
-    },
-        {
-        "title": "Cybersecurity Best Practices",
-        "description": "Learn about security measures to protect against cyber threats."
-    },
-    {
-        "title": "Open Source Software",
-        "description": "Discuss open-source projects and contributions."
-    },
-    {
-        "title": "Game Development",
-        "description": "Explore video game design and development."
-    },
-    {
-        "title": "Cloud Services and Providers",
-        "description": "Compare different cloud service providers and offerings."
-    },
-    {
-        "title": "API Design and Documentation",
-        "description": "Learn about creating and documenting APIs."
-    },
-    {
-        "title": "Mobile App Security",
-        "description": "Discuss strategies to secure mobile applications."
-    },
-    {
-        "title": "3D Printing Technology",
-        "description": "Explore the world of 3D printing and additive manufacturing."
-    },
-    {
-        "title": "Linux Administration",
-        "description": "Learn about Linux system administration and server management."
-    },
-    {
-        "title": "Data Visualization",
-        "description": "Explore data visualization techniques and tools."
-    },
-    {
-        "title": "Quantum Cryptography",
-        "description": "Discuss secure communication using quantum principles."
-    },
-    {
-        "title": "API Security",
-        "description": "Learn about protecting APIs against security threats."
-    },
-    {
-        "title": "Agile Project Management",
-        "description": "Explore Agile methodologies for project management."
-    },
-    {
-        "title": "Virtual Private Networks (VPNs)",
-        "description": "Discuss VPN technologies and privacy protection."
-    },
-    {
-        "title": "Internet Security Threats",
-        "description": "Explore common threats to internet security and data breaches."
-    },
-    {
-        "title": "Cloud-Native DevOps",
-        "description": "Combine cloud-native and DevOps practices for efficiency."
-    },
-    {
-        "title": "Deep Reinforcement Learning",
-        "description": "Learn about reinforcement learning for AI and robotics."
-    },
-    {
-        "title": "Quantum Machine Learning",
-        "description": "Explore machine learning algorithms for quantum computers."
-    },
-    {
-        "title": "Bioinformatics",
-        "description": "Discuss the use of IT in biological research and data analysis."
-    },
-    {
-        "title": "Data Warehousing",
-        "description": "Learn about large-scale data storage and analysis."
-    },
-    {
-        "title": "Mobile App Monetization",
-        "description": "Discuss strategies to monetize mobile applications."
-    },
-    {
-        "title": "Neuromorphic Computing",
-        "description": "Explore computing inspired by the human brain."
-    },
-    {
-        "title": "Geographic Information Systems (GIS)",
-        "description": "Learn about spatial data analysis and mapping."
-    },
-    {
-        "title": "E-Government Solutions",
-        "description": "Discuss digital government services and solutions."
-    },
-    {
-        "title": "Computer Vision",
-        "description": "Explore image and video analysis using AI."
-    },
-    {
-        "title": "AR/VR Development Tools",
-        "description": "Learn about tools for creating augmented and virtual reality experiences."
-    },
-    {
-        "title": "Quantum Internet",
-        "description": "Discuss quantum communication and networking."
-    },
-    {
-        "title": "Edge AI",
-        "description": "Explore AI and machine learning at the edge of the network."
-    },
-    {
-        "title": "Natural Language Processing (NLP)",
-        "description": "Learn about processing and understanding human language with AI."
-    },
-    {
-        "title": "Smart Cities",
-        "description": "Discuss technologies for urban planning and management."
-    }
+  {
+    "title": "Machine Learning",
+    "description": "Explore the world of machine learning and artificial intelligence."
+  },
+  {
+    "title": "Web Development",
+    "description": "Discuss web technologies, frameworks, and best practices."
+  },
+  {
+    "title": "Mobile App Development",
+    "description": "Learn about mobile app development for iOS and Android platforms."
+  },
+  {
+    "title": "Data Science",
+    "description": "Discover data analysis, visualization, and data-driven insights."
+  },
+  {
+    "title": "Cloud Computing",
+    "description": "Explore cloud services and infrastructure for scalable applications."
+  },
+  {
+    "title": "Cybersecurity",
+    "description": "Discuss strategies and techniques for protecting digital assets."
+  },
+  {
+    "title": "Artificial Intelligence Ethics",
+    "description": "Explore the ethical implications of AI and machine learning."
+  },
+  {
+    "title": "IoT (Internet of Things)",
+    "description": "Learn about IoT devices, applications, and security."
+  },
+  {
+    "title": "Blockchain Technology",
+    "description": "Discuss decentralized ledgers and cryptocurrency technologies."
+  },
+  {
+    "title": "Software Development Methodologies",
+    "description": "Explore Agile, Scrum, and other development methodologies."
+  },
+  {
+    "title": "DevOps Practices",
+    "description": "Discuss DevOps principles for software development and operations."
+  },
+  {
+    "title": "Big Data Analytics",
+    "description": "Learn about processing and analyzing large datasets."
+  },
+  {
+    "title": "Python Programming",
+    "description": "Discuss Python language features, libraries, and frameworks."
+  },
+  {
+    "title": "JavaScript Development",
+    "description": "Explore JavaScript, ES6, and modern web development."
+  },
+  {
+    "title": "Cloud Security",
+    "description": "Discuss strategies for securing data in the cloud."
+  },
+  {
+    "title": "Frontend Frameworks",
+    "description": "Learn about popular frontend frameworks like React and Angular."
+  },
+  {
+    "title": "Backend Development",
+    "description": "Explore server-side technologies and API development."
+  },
+  {
+    "title": "Database Management",
+    "description": "Discuss SQL, NoSQL, and database design."
+  },
+  {
+    "title": "UI/UX Design",
+    "description": "Explore user interface and user experience design principles."
+  },
+  {
+    "title": "Artificial Neural Networks",
+    "description": "Learn about deep learning and neural network architectures."
+  },
+  {
+    "title": "Virtual Reality (VR)",
+    "description": "Discuss VR technologies and applications."
+  },
+  {
+    "title": "5G and Networking",
+    "description": "Explore the latest advancements in networking and 5G technology."
+  },
+  {
+    "title": "Robotics and Automation",
+    "description": "Learn about robotics and automation in various industries."
+  },
+  {
+    "title": "Biotechnology",
+    "description": "Discuss the intersection of biology and technology."
+  },
+  {
+    "title": "Cyber Threat Intelligence",
+    "description": "Explore the latest threats and intelligence in cybersecurity."
+  },
+  {
+    "title": "Data Privacy",
+    "description": "Discuss data protection and privacy regulations."
+  },
+  {
+    "title": "Cloud-Native Applications",
+    "description": "Explore building and deploying cloud-native applications."
+  },
+  {
+    "title": "AR (Augmented Reality)",
+    "description": "Learn about AR technologies and applications."
+  },
+  {
+    "title": "Edge Computing",
+    "description": "Discuss processing data closer to its source for low latency."
+  },
+  {
+    "title": "Quantum Computing",
+    "description": "Explore quantum computing and its potential impact."
+  },
+  {
+    "title": "Cybersecurity Best Practices",
+    "description": "Learn about security measures to protect against cyber threats."
+  },
+  {
+    "title": "Open Source Software",
+    "description": "Discuss open-source projects and contributions."
+  },
+  {
+    "title": "Game Development",
+    "description": "Explore video game design and development."
+  },
+  {
+    "title": "Cloud Services and Providers",
+    "description": "Compare different cloud service providers and offerings."
+  },
+  {
+    "title": "API Design and Documentation",
+    "description": "Learn about creating and documenting APIs."
+  },
+  {
+    "title": "Mobile App Security",
+    "description": "Discuss strategies to secure mobile applications."
+  },
+  {
+    "title": "3D Printing Technology",
+    "description": "Explore the world of 3D printing and additive manufacturing."
+  },
+  {
+    "title": "Linux Administration",
+    "description": "Learn about Linux system administration and server management."
+  },
+  {
+    "title": "Data Visualization",
+    "description": "Explore data visualization techniques and tools."
+  },
+  {
+    "title": "Quantum Cryptography",
+    "description": "Discuss secure communication using quantum principles."
+  },
+  {
+    "title": "API Security",
+    "description": "Learn about protecting APIs against security threats."
+  },
+  {
+    "title": "Agile Project Management",
+    "description": "Explore Agile methodologies for project management."
+  },
+  {
+    "title": "Virtual Private Networks (VPNs)",
+    "description": "Discuss VPN technologies and privacy protection."
+  },
+  {
+    "title": "Internet Security Threats",
+    "description": "Explore common threats to internet security and data breaches."
+  },
+  {
+    "title": "Cloud-Native DevOps",
+    "description": "Combine cloud-native and DevOps practices for efficiency."
+  },
+  {
+    "title": "Deep Reinforcement Learning",
+    "description": "Learn about reinforcement learning for AI and robotics."
+  },
+  {
+    "title": "Quantum Machine Learning",
+    "description": "Explore machine learning algorithms for quantum computers."
+  },
+  {
+    "title": "Bioinformatics",
+    "description": "Discuss the use of IT in biological research and data analysis."
+  },
+  {
+    "title": "Data Warehousing",
+    "description": "Learn about large-scale data storage and analysis."
+  },
+  {
+    "title": "Mobile App Monetization",
+    "description": "Discuss strategies to monetize mobile applications."
+  },
+  {
+    "title": "Neuromorphic Computing",
+    "description": "Explore computing inspired by the human brain."
+  },
+  {
+    "title": "Geographic Information Systems (GIS)",
+    "description": "Learn about spatial data analysis and mapping."
+  },
+  {
+    "title": "E-Government Solutions",
+    "description": "Discuss digital government services and solutions."
+  },
+  {
+    "title": "Computer Vision",
+    "description": "Explore image and video analysis using AI."
+  },
+  {
+    "title": "AR/VR Development Tools",
+    "description": "Learn about tools for creating augmented and virtual reality experiences."
+  },
+  {
+    "title": "Quantum Internet",
+    "description": "Discuss quantum communication and networking."
+  },
+  {
+    "title": "Edge AI",
+    "description": "Explore AI and machine learning at the edge of the network."
+  },
+  {
+    "title": "Natural Language Processing (NLP)",
+    "description": "Learn about processing and understanding human language with AI."
+  },
+  {
+    "title": "Smart Cities",
+    "description": "Discuss technologies for urban planning and management."
+  },
+  {
+    "title": "React.js",
+    "description": "A JavaScript library for building user interfaces. React allows developers to create reusable UI components and efficiently update and render the user interface."
+  },
+  {
+    "title": "Node.js",
+    "description": "An open-source, cross-platform JavaScript runtime environment that enables server-side execution of JavaScript code. It is commonly used for building scalable network applications."
+  },
+  {
+    "title": "Python",
+    "description": "A versatile and high-level programming language known for its readability and simplicity. Python is widely used in web development, data science, artificial intelligence, and automation."
+  },
+  {
+    "title": "Django",
+    "description": "A high-level Python web framework that encourages rapid development and clean, pragmatic design. Django follows the model-view-controller (MVC) architectural pattern."
+  },
+  {
+    "title": "Angular",
+    "description": "A TypeScript-based open-source front-end web application framework led by the Angular Team at Google. Angular is widely used for building dynamic and scalable web applications."
+  },
+  {
+    "title": "Vue.js",
+    "description": "A progressive JavaScript framework used for building user interfaces. Vue.js is designed to be incrementally adaptable and can be integrated into existing projects easily."
+  },
+  {
+    "title": "Java",
+    "description": "A general-purpose, class-based, object-oriented programming language that is designed to have as few implementation dependencies as possible. Java is widely used for building enterprise-level applications."
+  },
+  {
+    "title": "Spring Boot",
+    "description": "An extension of the Spring framework that simplifies the process of building production-ready applications with the Spring framework. Spring Boot promotes convention over configuration and includes an embedded web server for easy deployment."
+  },
+  {
+    "title": "TypeScript",
+    "description": "A superset of JavaScript that adds optional static typing. TypeScript is designed for large-scale applications and compiles to plain JavaScript."
+  },
+  {
+    "title": "Git",
+    "description": "A distributed version control system widely used for source code management. Git facilitates collaboration among developers and is known for its speed and flexibility."
+  },
+  {
+    "title": "Vue.js",
+    "description": "A progressive JavaScript framework for building user interfaces. Vue.js is known for its simplicity and ease of integration, making it a popular choice for modern web development."
+  },
+  {
+    "title": "Express.js",
+    "description": "A minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications. Express.js is widely used for building RESTful APIs."
+  },
+  {
+    "title": "Ruby on Rails",
+    "description": "A web application framework written in Ruby. Ruby on Rails follows the convention over configuration (CoC) and don't repeat yourself (DRY) principles, emphasizing developer productivity and simplicity."
+  },
+  {
+    "title": "Go (Golang)",
+    "description": "An open-source programming language developed by Google. Go is known for its simplicity, efficiency, and strong support for concurrent programming, making it suitable for building scalable systems."
+  },
+  {
+    "title": "Flutter",
+    "description": "An open-source UI software development toolkit created by Google. Flutter is used for building natively compiled applications for mobile, web, and desktop from a single codebase."
+  },
+  {
+    "title": "Swift",
+    "description": "A powerful and intuitive programming language developed by Apple for iOS, macOS, watchOS, and tvOS app development. Swift is designed to be easy to read and write."
+  },
+  {
+    "title": "Docker",
+    "description": "A platform for developing, shipping, and running applications in containers. Docker enables developers to package applications and their dependencies into a standardized unit for seamless deployment across different environments."
+  },
+  {
+    "title": "Kubernetes",
+    "description": "An open-source container orchestration platform for automating the deployment, scaling, and management of containerized applications. Kubernetes is widely used for container orchestration in cloud-native environments."
+  },
+  {
+    "title": "GraphQL",
+    "description": "A query language for APIs and a runtime for executing those queries with existing data. GraphQL provides a more efficient, powerful, and flexible alternative to traditional REST APIs."
+  },
+  {
+    "title": "Rust",
+    "description": "A systems programming language that focuses on safety, performance, and concurrency. Rust is designed to prevent common programming errors and is suitable for building high-performance and reliable software."
+  },
+  {
+    "title": "Flask",
+    "description": "A micro web framework for Python. Flask is lightweight and easy to use, making it a popular choice for building small to medium-sized web applications."
+  },
+  {
+    "title": "TensorFlow",
+    "description": "An open-source machine learning framework developed by the Google Brain team. TensorFlow is widely used for building and training machine learning models, including deep learning."
+  },
+  {
+    "title": "PyTorch",
+    "description": "An open-source machine learning library for Python developed by Facebook. PyTorch is known for its dynamic computational graph and is often used for research and prototyping in deep learning."
+  },
+  {
+    "title": "GraphQL",
+    "description": "A query language and runtime for APIs that empowers clients to request the data they need. GraphQL provides a more efficient, flexible, and powerful alternative to traditional REST APIs."
+  },
+  {
+    "title": "ASP.NET Core",
+    "description": "A cross-platform, high-performance framework for building modern, cloud-based, and internet-connected applications. ASP.NET Core is developed by Microsoft and is a key part of the .NET ecosystem."
+  },
+  {
+    "title": "RxJS",
+    "description": "A library for reactive programming using Observables in JavaScript. RxJS is often used to handle asynchronous and event-based operations in web applications."
+  },
+  {
+    "title": "Jupyter Notebooks",
+    "description": "An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text. Jupyter Notebooks are widely used for data analysis, machine learning, and scientific research."
+  },
+  {
+    "title": "Next.js",
+    "description": "A React-based web application framework that enables functionality such as server-side rendering and generating static websites. Next.js simplifies the development of React applications by providing a batteries-included approach."
+  },
+  {
+    "title": "RxJava",
+    "description": "A library for composing asynchronous and event-based programs using observable sequences for the Java Virtual Machine (JVM). RxJava is often used for handling concurrency in Android applications."
+  },
+  {
+    "title": "Kotlin",
+    "description": "A statically-typed programming language that runs on the Java Virtual Machine (JVM). Kotlin is known for its concise syntax and interoperability with existing Java code, making it a popular choice for Android app development."
+  },
+  {
+    "title": "Raspberry Pi",
+    "description": "A series of small single-board computers developed by the Raspberry Pi Foundation. Raspberry Pi is widely used for various projects, including home automation, robotics, and educational purposes."
+  },
+  {
+    "title": "Redux",
+    "description": "A predictable state container for JavaScript applications. Redux is often used with React to manage the state of an application in a predictable way, especially in larger and more complex applications."
+  },
+  {
+    "title": "Firebase",
+    "description": "A mobile and web application development platform developed by Google. Firebase provides a suite of services, including real-time database, authentication, hosting, and cloud functions, making it easy to develop and scale applications."
+  },
+  {
+    "title": "Elasticsearch",
+    "description": "A distributed search and analytics engine built on top of Apache Lucene. Elasticsearch is commonly used for full-text search, log analytics, and data visualization."
+  },
+  {
+    "title": "Apache Kafka",
+    "description": "A distributed event streaming platform that can be used for building real-time data pipelines and streaming applications. Apache Kafka is often employed for handling large-scale, high-throughput data streams."
+  },
+  {
+    "title": "Redux Saga",
+    "description": "A middleware library for managing side effects in Redux applications. Redux Saga is commonly used to handle asynchronous operations such as data fetching and updating the Redux store in a more declarative manner."
+  },
+  {
+    "title": "Tailwind CSS",
+    "description": "A utility-first CSS framework that provides low-level utility classes to build designs directly in your markup. Tailwind CSS is customizable and helps streamline the process of styling web applications."
+  },
+  {
+    "title": "GraphQL Apollo Client",
+    "description": "A fully-featured GraphQL client for React applications. Apollo Client simplifies the process of interacting with GraphQL APIs, providing features like caching, state management, and real-time data updates."
+  },
+  {
+    "title": "Arduino",
+    "description": "An open-source electronics platform based on easy-to-use hardware and software. Arduino is widely used for creating interactive electronic projects and prototypes."
+  },
+  {
+    "title": "AWS Lambda",
+    "description": "A serverless computing service provided by Amazon Web Services. AWS Lambda allows developers to run code without provisioning or managing servers, making it suitable for event-driven applications."
+  },
+  {
+    "title": "GraphQL Yoga",
+    "description": "A fully-featured GraphQL server library for Node.js based on Express. GraphQL Yoga simplifies the process of creating GraphQL servers, handling subscriptions, and integrating with data sources."
+  },
+  {
+    "title": "Tailwind CSS",
+    "description": "A utility-first CSS framework that provides low-level utility classes to build designs directly in your markup. Tailwind CSS is customizable and helps streamline the process of styling web applications."
+  },
+  {
+    "title": "D3.js",
+    "description": "A JavaScript library for producing dynamic, interactive data visualizations in web browsers. D3.js allows developers to bind data to the Document Object Model (DOM) and apply data-driven transformations."
+  },
+  {
+    "title": "RxSwift",
+    "description": "A reactive programming library for Swift, bringing the principles of reactive programming to the iOS development ecosystem. RxSwift simplifies handling asynchronous tasks and event-driven programming."
+  },
+  {
+    "title": "Webpack",
+    "description": "A module bundler for JavaScript applications. Webpack is commonly used to bundle and optimize JavaScript, CSS, and other assets, providing a robust build process for modern web development."
+  },
+  {
+    "title": "Redux Thunk",
+    "description": "A middleware for Redux that allows the use of asynchronous logic in Redux actions. Redux Thunk is often used to handle asynchronous operations such as data fetching in Redux applications."
+  },
+  {
+    "title": "Apache Spark",
+    "description": "An open-source distributed computing system used for big data processing and analytics. Apache Spark provides high-level APIs in Java, Scala, Python, and R, making it suitable for various data processing tasks."
+  },
+  {
+    "title": "JUnit",
+    "description": "A widely-used testing framework for Java. JUnit provides annotations and assertions to simplify the process of writing and running unit tests for Java applications."
+  },
+  {
+    "title": "Chakra UI",
+    "description": "A simple and modular component library for React applications. Chakra UI provides a set of accessible and customizable UI components to enhance the development of React-based user interfaces."
+  },
+  {
+    "title": "Laravel",
+    "description": "A PHP web application framework that follows the model-view-controller (MVC) architectural pattern. Laravel is known for its elegant syntax, robust features, and developer-friendly tools."
+  },
+  {
+    "title": "Selenium",
+    "description": "A browser automation framework that allows developers to write test scripts in various programming languages to automate web application testing. Selenium supports multiple browsers and operating systems."
+  },
+  {
+    "title": "RabbitMQ",
+    "description": "An open-source message broker software that facilitates message queuing between distributed systems. RabbitMQ is commonly used for building scalable and reliable messaging architectures."
+  },
+  {
+    "title": "JUnit 5",
+    "description": "The next generation of the JUnit testing framework for Java. JUnit 5 introduces new features, annotations, and extension points to enhance the testing capabilities of Java applications."
+  },
+  {
+    "title": "Lodash",
+    "description": "A JavaScript utility library that provides helper functions for common programming tasks. Lodash is widely used for simplifying tasks such as array manipulation, object iteration, and functional programming."
+  },
+  {
+    "title": "Kotlin Coroutines",
+    "description": "A concurrency design pattern for Kotlin that simplifies the handling of asynchronous programming. Kotlin Coroutines provide a way to write asynchronous code in a more concise and readable manner."
+  },
+  {
+    "title": "Jest",
+    "description": "A JavaScript testing framework designed to ensure correctness of any JavaScript codebase. Jest provides a comprehensive set of features for writing and running tests in JavaScript applications."
+  },
+  {
+    "title": "SwiftUI",
+    "description": "A declarative user interface framework for building apps across all Apple platforms. SwiftUI simplifies the development of user interfaces in Swift by providing a modern and intuitive approach."
+  },
+  {
+    "title": "Amazon DynamoDB",
+    "description": "A fully-managed NoSQL database service provided by Amazon Web Services. Amazon DynamoDB is designed for high-performance, low-latency applications with seamless scalability."
+  },
+  {
+    "title": "Vue Router",
+    "description": "The official router for Vue.js, used to create navigation links and handle routing in Vue applications. Vue Router provides a declarative way to map URLs to components in a Vue application."
+  },
+  {
+    "title": "Redux Persist",
+    "description": "A library for persisting and rehydrating a Redux store. Redux Persist is commonly used in React and React Native applications to maintain state across app launches and reloads."
+  }
 ]

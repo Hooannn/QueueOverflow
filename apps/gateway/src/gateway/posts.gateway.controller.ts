@@ -104,6 +104,66 @@ export class PostsGatewayController {
     }
   }
 
+  @Get('my_own')
+  async findMyOwn(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: QPost[];
+        total?: number;
+      }>(
+        this.postsClient.send('post.find_all_by_uid', {
+          queryDto: { ...queryDto, relations },
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('user/:userId')
+  async findUserPosts(
+    @Param('userId') userId: string,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: QPost[];
+        total?: number;
+      }>(
+        this.postsClient.send('post.find_all_by_uid', {
+          queryDto: { ...queryDto, relations },
+          userId,
+        }),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {

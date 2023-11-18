@@ -46,6 +46,26 @@ export class PostsController {
     }
   }
 
+  @MessagePattern('post.find_all_by_uid')
+  async findAllByUid(
+    @Payload() params: { queryDto: QueryDto; userId: string },
+  ) {
+    try {
+      const { data, total } = await this.postsService.findAllByUid(
+        params.queryDto,
+        params.userId,
+      );
+
+      return { data, total };
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @MessagePattern('post.find_by_id')
   async findOne(@Payload() id: string) {
     try {

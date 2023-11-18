@@ -108,6 +108,44 @@ export class PostsService {
       total,
     };
   }
+
+  async findAllByUid(query: QueryPostDto, userId: string) {
+    const findOptions: FindManyOptions<Post> = {
+      select: this.findOptionsSelect,
+      where: {
+        created_by: userId,
+      },
+      skip: query.offset,
+      take: query.limit,
+      relations: (query as any).relations ?? [],
+      order: {
+        updated_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<Post> = {
+      where: { created_by: userId },
+      select: { id: true },
+    };
+    if (query.topicIds?.length) {
+      const where: FindOptionsWhere<Post>[] = query.topicIds.map((topicId) => ({
+        topics: { id: topicId },
+      }));
+      where.push({ created_by: userId });
+      findOptions.where = where;
+      countOptions.where = where;
+    }
+
+    const [data, total] = await Promise.all([
+      this.postsRepository.find(findOptions),
+      this.postsRepository.count(countOptions),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
+
   async findOne(id: string) {
     const res = await this.postsRepository.findOne({
       select: this.findOptionsSelect,

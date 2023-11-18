@@ -105,6 +105,23 @@ export class UsersGatewayController {
     }
   }
 
+  @Get('profile/:id')
+  async findUserProfile(@Param('id') userId: string) {
+    try {
+      const user = await firstValueFrom<User>(
+        this.usersClient.send('user.find_by_id', userId),
+      );
+      delete user.roles;
+      return new Response<User>({
+        code: 200,
+        success: true,
+        data: user,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Patch('profile')
   async updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
     try {
