@@ -10,6 +10,7 @@ import {
 import { Post, VoteType, PostVote, User } from '@queueoverflow/shared/entities';
 import {
   CreatePostDto,
+  QueryDto,
   QueryPostDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
@@ -201,6 +202,86 @@ export class PostsService {
 
     this.searchClient.emit('post.removed', id);
     return res;
+  }
+
+  async findUpvotedPosts(query: QueryDto, userId: string) {
+    const findOptions: FindManyOptions<PostVote> = {
+      skip: query.offset,
+      take: query.limit,
+      where: {
+        uid: userId,
+        type: VoteType.Up,
+      },
+      select: {
+        post: {
+          ...this.findOptionsSelect,
+          title: true,
+          id: true,
+          tags: true,
+          type: true,
+          content: true,
+          publish: true,
+          updated_at: true,
+          created_at: true,
+          created_by: true,
+        },
+      },
+      relations: (query as any).relations ?? [],
+      order: {
+        updated_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<PostVote> = {
+      select: { post_id: true },
+      where: { uid: userId },
+    };
+
+    const [data, total] = await Promise.all([
+      this.votesRepository.find(findOptions),
+      this.votesRepository.count(countOptions),
+    ]);
+
+    return { data, total };
+  }
+
+  async findDownvotedPosts(query: QueryDto, userId: string) {
+    const findOptions: FindManyOptions<PostVote> = {
+      skip: query.offset,
+      take: query.limit,
+      where: {
+        uid: userId,
+        type: VoteType.Down,
+      },
+      select: {
+        post: {
+          ...this.findOptionsSelect,
+          title: true,
+          id: true,
+          tags: true,
+          type: true,
+          content: true,
+          publish: true,
+          updated_at: true,
+          created_at: true,
+          created_by: true,
+        },
+      },
+      relations: (query as any).relations ?? [],
+      order: {
+        updated_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<PostVote> = {
+      select: { post_id: true },
+      where: { uid: userId },
+    };
+
+    const [data, total] = await Promise.all([
+      this.votesRepository.find(findOptions),
+      this.votesRepository.count(countOptions),
+    ]);
+
+    return { data, total };
   }
 
   async upvote(postId: string, userId: string) {

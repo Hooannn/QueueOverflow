@@ -4,16 +4,16 @@ import { QueryDto } from '@queueoverflow/shared/dtos';
 import {
   Post,
   PostVote,
-  SavedPost,
   User,
+  UserHistory,
 } from '@queueoverflow/shared/entities';
 import { FindManyOptions, FindOptionsSelect, Repository } from 'typeorm';
 
 @Injectable()
-export class SavedPostsService {
+export class UserHistoriesService {
   constructor(
-    @InjectRepository(SavedPost)
-    private readonly savedPostsRepository: Repository<SavedPost>,
+    @InjectRepository(UserHistory)
+    private readonly savedPostsRepository: Repository<UserHistory>,
   ) {}
 
   private userFindOptionsSelect: FindOptionsSelect<User> = {
@@ -62,39 +62,33 @@ export class SavedPostsService {
     },
   };
 
-  private findOptionsSelect: FindOptionsSelect<SavedPost> = {
+  private findOptionsSelect: FindOptionsSelect<UserHistory> = {
     post: this.postfindOptionsSelect,
   };
 
   async create(userId: string, postId: string) {
-    const post = this.savedPostsRepository.create({
+    const entity = this.savedPostsRepository.create({
       uid: userId,
       post_id: postId,
+      updated_at: new Date(),
     });
-    return await this.savedPostsRepository.save(post);
-  }
-
-  async remove(userId: string, postId: string) {
-    return await this.savedPostsRepository.delete({
-      uid: userId,
-      post_id: postId,
-    });
+    return await this.savedPostsRepository.save(entity);
   }
 
   async findAll(query: QueryDto, userId: string) {
-    const findOptions: FindManyOptions<SavedPost> = {
+    const findOptions: FindManyOptions<UserHistory> = {
       skip: query.offset,
       take: query.limit,
       where: {
         uid: userId,
       },
-      select: this.findOptionsSelect,
       relations: (query as any).relations ?? [],
+      select: this.findOptionsSelect,
       order: {
         updated_at: -1,
       },
     };
-    const countOptions: FindManyOptions<SavedPost> = {
+    const countOptions: FindManyOptions<UserHistory> = {
       select: { post_id: true },
       where: { uid: userId },
     };
@@ -105,12 +99,5 @@ export class SavedPostsService {
     ]);
 
     return { data, total };
-  }
-
-  async findAllIds(userId: string) {
-    return await this.savedPostsRepository.find({
-      where: { uid: userId },
-      select: { post_id: true },
-    });
   }
 }

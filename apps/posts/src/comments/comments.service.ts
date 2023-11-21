@@ -29,6 +29,16 @@ export class CommentsService {
       avatar: true,
       id: true,
     },
+    post: {
+      id: true,
+      title: true,
+      creator: {
+        first_name: true,
+        last_name: true,
+        avatar: true,
+        id: true,
+      },
+    },
     votes: {
       uid: true,
       type: true,

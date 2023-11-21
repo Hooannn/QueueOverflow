@@ -10,11 +10,12 @@ import {
   Body,
   Param,
   Delete,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Response } from '@queueoverflow/shared/utils';
-import { SavedPost } from '@queueoverflow/shared/entities';
+import { Post as QPost, SavedPost } from '@queueoverflow/shared/entities';
 import { QueryDto } from '@queueoverflow/shared/dtos';
 import { DeleteResult } from 'typeorm';
 
@@ -29,24 +30,29 @@ export class SavedPostsGatewayController {
   ) {}
 
   @Get()
-  async findAllSavedPosts(@Query() queryDto: QueryDto, @Req() req) {
+  async findAllSavedPosts(
+    @Query() queryDto: QueryDto,
+    @Req() req,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
     try {
       const { data, total } = await firstValueFrom<{
         data: SavedPost[];
         total?: number;
       }>(
         this.postsClient.send('saved_post.find_all', {
-          query: queryDto,
+          query: { ...queryDto, relations },
           userId: req.auth?.userId,
         }),
       );
 
-      return new Response<SavedPost[]>({
+      return new Response<QPost[]>({
         code: 200,
         success: true,
         total,
         took: data.length,
-        data,
+        data: data.map((savedPost) => savedPost.post),
       });
     } catch (error) {
       throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);

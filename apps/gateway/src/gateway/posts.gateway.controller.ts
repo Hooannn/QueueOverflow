@@ -19,7 +19,7 @@ import {
   QueryDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
-import { Post as QPost } from '@queueoverflow/shared/entities';
+import { PostVote, Post as QPost } from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
 import { Response } from '@queueoverflow/shared/utils';
 
@@ -134,6 +134,66 @@ export class PostsGatewayController {
     }
   }
 
+  @Get('upvoted')
+  async findUpvotedPosts(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: PostVote[];
+        total?: number;
+      }>(
+        this.postsClient.send('post.find_upvoted', {
+          query: { ...queryDto, relations },
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data: data.map((postVote) => postVote.post),
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('downvoted')
+  async findDownvotedPosts(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: PostVote[];
+        total?: number;
+      }>(
+        this.postsClient.send('post.find_downvoted', {
+          query: { ...queryDto, relations },
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data: data.map((postVote) => postVote.post),
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get('user/:userId')
   async findUserPosts(
     @Param('userId') userId: string,
@@ -165,11 +225,20 @@ export class PostsGatewayController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req) {
     try {
       const post = await firstValueFrom<QPost>(
         this.postsClient.send('post.find_by_id', id),
       );
+
+      if (req.auth?.userId) {
+        firstValueFrom(
+          this.postsClient.send('user_history.create', {
+            userId: req.auth?.userId,
+            postId: id,
+          }),
+        );
+      }
 
       return new Response<QPost>({
         code: 200,

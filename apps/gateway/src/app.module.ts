@@ -17,6 +17,7 @@ import { CommentsGatewayController } from './gateway/comments.gateway.controller
 import { SearchGatewayController } from './gateway/search.gateway.controller';
 import { SavedPostsGatewayController } from './gateway/saved_posts.gateway.controller';
 import { PostSubscriptionsGatewayController } from './gateway/post_subscriptions.gateway.controller';
+import { UserHistoriesGatewayController } from './gateway/user_histories.gateway.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -92,6 +93,7 @@ import { PostSubscriptionsGatewayController } from './gateway/post_subscriptions
     SearchGatewayController,
     SavedPostsGatewayController,
     PostSubscriptionsGatewayController,
+    UserHistoriesGatewayController,
   ],
   providers: [
     {
