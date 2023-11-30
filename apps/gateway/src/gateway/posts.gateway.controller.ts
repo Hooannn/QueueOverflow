@@ -250,6 +250,23 @@ export class PostsGatewayController {
     }
   }
 
+  @Get(':id/related')
+  async findRelatedPosts(@Param('id') id: string) {
+    try {
+      const data = await firstValueFrom<QPost[]>(
+        this.postsClient.send('post.find_related', id),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req) {
     try {

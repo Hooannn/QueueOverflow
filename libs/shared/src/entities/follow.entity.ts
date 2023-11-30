@@ -30,7 +30,10 @@ export class Follow {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "from_uid",
     referencedColumnName: "id",
@@ -38,7 +41,10 @@ export class Follow {
   })
   from_user: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "to_uid",
     referencedColumnName: "id",

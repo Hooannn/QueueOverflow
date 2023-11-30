@@ -19,7 +19,10 @@ export class PostSubscription {
   @PrimaryColumn()
   post_id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "uid",
     referencedColumnName: "id",
@@ -27,7 +30,10 @@ export class PostSubscription {
   })
   user: User;
 
-  @ManyToOne(() => Post)
+  @ManyToOne(() => Post, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "post_id",
     referencedColumnName: "id",

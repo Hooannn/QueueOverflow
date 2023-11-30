@@ -27,7 +27,7 @@ export class UserHistory {
   })
   user: User;
 
-  @ManyToOne(() => Post)
+  @ManyToOne(() => Post, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn({
     name: "post_id",
     referencedColumnName: "id",

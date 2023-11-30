@@ -68,6 +68,18 @@ export class AuthService {
     @Inject('USERS_SERVICE') private readonly usersClient: ClientProxy,
   ) {}
 
+  async signOut(userId: string, client: 'web' | 'ios' | 'android') {
+    await this.redisClient.del(`refresh_token:${userId}`);
+    await firstValueFrom(
+      this.notificationsClient.send('fcm_token.remove', {
+        userId,
+        client,
+      }),
+    );
+
+    return 'ok';
+  }
+
   async signIn(signInDto: SignInDto) {
     try {
       const requestUser = await firstValueFrom<User>(

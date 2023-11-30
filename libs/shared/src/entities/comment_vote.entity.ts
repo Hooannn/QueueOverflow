@@ -10,7 +10,11 @@ export class CommentVote extends Vote {
 
   @ManyToOne(
     () => Comment,
-    (comment) => comment.votes
+    (comment) => comment.votes,
+    {
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    }
   )
   @JoinColumn({
     name: "comment_id",

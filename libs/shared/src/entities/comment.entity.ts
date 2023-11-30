@@ -28,7 +28,10 @@ export class Comment extends BaseEntity {
   })
   parent_id?: string;
 
-  @ManyToOne(() => Comment)
+  @ManyToOne(() => Comment, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "parent_id",
     referencedColumnName: "id",
@@ -58,7 +61,8 @@ export class Comment extends BaseEntity {
 
   @ManyToOne(
     () => Post,
-    (post) => post.comments
+    (post) => post.comments,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" }
   )
   @JoinColumn({
     name: "post_id",

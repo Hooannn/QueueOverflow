@@ -7,6 +7,7 @@ import {
   Post,
   Body,
   Inject,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { isEmail } from 'class-validator';
@@ -90,6 +91,17 @@ export class AuthController {
       success: true,
       data: res,
       message: 'Signed in successfully',
+    });
+  }
+
+  @Post('sign-out')
+  async signOut(@Req() req, @Body('client') client: 'web' | 'android' | 'ios') {
+    const res = await this.authService.signOut(req.auth?.userId, client);
+    return new Response<any>({
+      code: 200,
+      success: true,
+      data: res,
+      message: 'Signed out successfully',
     });
   }
 

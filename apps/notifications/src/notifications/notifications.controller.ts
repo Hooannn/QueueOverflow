@@ -101,6 +101,30 @@ export class NotificationsController {
     );
   }
 
+  @MessagePattern('fcm_token.remove')
+  async removeFcmToken(
+    @Payload()
+    params: {
+      userId: string;
+      client: 'web' | 'ios' | 'android';
+    },
+  ) {
+    try {
+      const res = await this.pushNotificationsService.removeFcmToken(
+        params.userId,
+        params.client,
+      );
+
+      return res;
+    } catch (error) {
+      const e = error instanceof RpcException ? error.getError() : error;
+      throw new RpcException({
+        message: e?.message || 'Invalid request',
+        status: e?.status || HttpStatus.BAD_REQUEST,
+      });
+    }
+  }
+
   @MessagePattern('fcm_token.create')
   async createFcmToken(
     @Payload()

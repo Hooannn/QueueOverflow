@@ -15,10 +15,12 @@ import {
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class PostsService {
   constructor(
+    private readonly httpService: HttpService,
     private dataSource: DataSource,
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
@@ -76,6 +78,17 @@ export class PostsService {
     this.searchClient.emit('post.created', [res]);
     this.notificationsClient.emit('post.created', post.id);
     return res;
+  }
+
+  async findRelated(postId: string) {
+    const ids = await this.httpService.axiosRef.get<string[]>(
+      `http://localhost:5001/posts/${postId}/related`,
+    );
+    if (!ids.data.length) return [];
+    const posts = await this.postsRepository.find({
+      where: ids.data.map((id) => ({ id })),
+    });
+    return posts;
   }
 
   async findAll(query: QueryPostDto) {

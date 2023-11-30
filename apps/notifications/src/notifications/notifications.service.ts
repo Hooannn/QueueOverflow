@@ -79,7 +79,6 @@ export class NotificationsService {
         this.postsClient.send('post.find_by_id', postId),
       );
 
-      if (!post.publish) return;
       const [...subs] = await Promise.all(
         post.topics.map((topic) => this.findSubscriptionsByTopicId(topic.id)),
       );
@@ -106,6 +105,11 @@ export class NotificationsService {
       ).filter((uid) => uid !== post.created_by);
 
       const notificationBody = {
+        meta_data: {
+          action_url: `${new URL(config.CLIENT_BASE_URL).origin}/post/${
+            post.id
+          }`,
+        },
         title: 'New Post',
         content: `${this.getUserName(
           post.creator,
@@ -164,13 +168,16 @@ export class NotificationsService {
 
       const uidsToNotify = [];
       const createNotificationsDto: InternalCreateNotificationDto[] = [];
-
+      const notificationMetaData = {
+        action_url: `${new URL(config.CLIENT_BASE_URL).origin}/post/${post.id}`,
+      };
       // Notify to owner of post
       if (post.created_by !== comment.created_by) {
         uidsToNotify.push(post.created_by);
         const notificationBody = {
           title: `${this.getUserName(comment.creator)} commented to your post`,
           content: comment.content,
+          meta_data: notificationMetaData,
         };
 
         createNotificationsDto.push({
@@ -192,6 +199,7 @@ export class NotificationsService {
             post.title
           }'`,
           content: comment.content,
+          meta_data: notificationMetaData,
         };
         filteredSubscriptions.forEach((sub) => {
           createNotificationsDto.push({
@@ -217,6 +225,7 @@ export class NotificationsService {
         const notificationBody = {
           title: `${this.getUserName(comment.creator)} replied to your comment`,
           content: comment.content,
+          meta_data: notificationMetaData,
         };
         createNotificationsDto.push({
           recipient_id: comment.parent.created_by,
@@ -290,6 +299,11 @@ export class NotificationsService {
       const notificationBody = {
         title: 'New Follower',
         content: `${this.getUserName(user)} followed you.`,
+        meta_data: {
+          action_url: `${new URL(config.CLIENT_BASE_URL).origin}/profile/${
+            user.id
+          }`,
+        },
       };
 
       const createNotificationDto: InternalCreateNotificationDto = {
@@ -325,6 +339,11 @@ export class NotificationsService {
       const notificationBody = {
         title: 'Follower is leaving',
         content: `${this.getUserName(user)} unfollowed you.`,
+        meta_data: {
+          action_url: `${new URL(config.CLIENT_BASE_URL).origin}/profile/${
+            user.id
+          }`,
+        },
       };
 
       const createNotificationDto: InternalCreateNotificationDto = {

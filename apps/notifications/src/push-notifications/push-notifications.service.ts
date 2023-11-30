@@ -26,6 +26,17 @@ export class PushNotificationsService {
     return await this.fcmTokensRepository.findOne({ where: { uid: userId } });
   }
 
+  async removeFcmToken(userId: string, client: 'web' | 'ios' | 'android') {
+    const fcmToken = await this.fcmTokensRepository.findOne({
+      where: { uid: userId },
+    });
+    if (!fcmToken) return 'Token not found';
+
+    if (['ios', 'android', 'web'].includes(client)) fcmToken[client] = null;
+
+    return await this.fcmTokensRepository.save(fcmToken);
+  }
+
   async createFcmToken(userId: string, createFcmTokenDto: CreateFcmTokenDto) {
     const existingToken = await this.findFcmToken(userId);
 
@@ -47,7 +58,7 @@ export class PushNotificationsService {
 
   async push(
     uids: string[],
-    notificationPayload: { title: string; content: string },
+    notificationPayload: { title: string; content: string; meta_data?: any },
   ) {
     const fcmTokens = await this.findFcmTokens(uids);
 
@@ -64,6 +75,7 @@ export class PushNotificationsService {
         title: notificationPayload.title,
         body: notificationPayload.content,
       },
+      data: notificationPayload.meta_data,
       token,
     }));
 

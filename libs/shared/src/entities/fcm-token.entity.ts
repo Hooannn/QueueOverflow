@@ -32,7 +32,10 @@ export class FcmToken {
   })
   ios?: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn({
     name: "uid",
     referencedColumnName: "id",

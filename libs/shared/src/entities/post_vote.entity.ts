@@ -10,7 +10,11 @@ export class PostVote extends Vote {
 
   @ManyToOne(
     () => Post,
-    (post) => post.votes
+    (post) => post.votes,
+    {
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    }
   )
   @JoinColumn({
     name: "post_id",

@@ -1,4 +1,4 @@
-import { BaseEntity, Comment, PostVote, Topic } from ".";
+import { BaseEntity, Comment, PostVote, Topic, UserHistory } from ".";
 import {
   Entity,
   Column,
@@ -52,19 +52,21 @@ export class Post extends BaseEntity {
 
   @OneToMany(
     () => PostVote,
-    (vote) => vote.post
+    (vote) => vote.post,
+    { cascade: true }
   )
   @JoinColumn()
   votes: PostVote[];
 
   @OneToMany(
     () => Comment,
-    (comment) => comment.post
+    (comment) => comment.post,
+    { cascade: true }
   )
   @JoinColumn()
   comments: Comment[];
 
-  @ManyToMany(() => Topic)
+  @ManyToMany(() => Topic, { cascade: true })
   @JoinTable({
     name: "posts_topics",
     joinColumn: {
