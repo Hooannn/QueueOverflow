@@ -110,12 +110,10 @@ export class NotificationsService {
             post.id
           }`,
         },
-        title: 'New Post',
+        title: post.title,
         content: `${this.getUserName(
           post.creator,
-        )} created a new post with title "${
-          post.title
-        }"${this.generateTopicsName(post)}`,
+        )} created a new post${this.generateTopicsName(post)}`,
       };
 
       const createNotificationsDto: InternalCreateNotificationDto[] =

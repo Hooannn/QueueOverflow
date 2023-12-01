@@ -16,6 +16,7 @@ import {
 } from '@queueoverflow/shared/dtos';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
+import config from 'src/configs';
 
 @Injectable()
 export class PostsService {
@@ -81,14 +82,21 @@ export class PostsService {
   }
 
   async findRelated(postId: string) {
-    const ids = await this.httpService.axiosRef.get<string[]>(
-      `http://localhost:5001/posts/${postId}/related`,
-    );
-    if (!ids.data.length) return [];
-    const posts = await this.postsRepository.find({
-      where: ids.data.map((id) => ({ id })),
+    const res = await this.httpService.axiosRef.get<
+      { id: string; score: number }[]
+    >(`${config.RECOMMENDATIONS_HOST}/posts/${postId}/related`);
+    if (!res.data.length) return [];
+    let posts = await this.postsRepository.find({
+      where: res.data.map((r) => ({ id: r.id })),
+      relations: {
+        votes: true,
+      },
     });
-    return posts;
+    posts = posts.map((p) => ({
+      ...p,
+      score: res.data.find((r) => r.id === p.id).score,
+    }));
+    return posts.reverse();
   }
 
   async findAll(query: QueryPostDto) {

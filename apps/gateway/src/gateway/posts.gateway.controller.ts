@@ -17,6 +17,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import {
   CreatePostDto,
   QueryDto,
+  QueryPostDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
 import { PostVote, Post as QPost } from '@queueoverflow/shared/entities';
@@ -82,7 +83,7 @@ export class PostsGatewayController {
 
   @Get()
   async findAllPosts(
-    @Query() queryDto: QueryDto,
+    @Query() queryDto: QueryPostDto,
     @Query('relations', new ParseArrayPipe({ optional: true }))
     relations?: string[],
   ) {
