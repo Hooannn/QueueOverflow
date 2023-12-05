@@ -66,7 +66,10 @@ export class Post extends BaseEntity {
   @JoinColumn()
   comments: Comment[];
 
-  @ManyToMany(() => Topic, { cascade: true })
+  @ManyToMany(() => Topic, {
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE",
+  })
   @JoinTable({
     name: "posts_topics",
     joinColumn: {

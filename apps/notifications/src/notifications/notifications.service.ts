@@ -73,6 +73,55 @@ export class NotificationsService {
     return await this.sendMail(mailOptions);
   }
 
+  async notifyPostReviewed(params: {
+    postId: string;
+    success: boolean;
+    message: string;
+  }) {
+    try {
+      const post = await firstValueFrom<Post>(
+        this.postsClient.send('post.find_by_id', params.postId),
+      );
+      const created_by = post.created_by;
+      const notificationBody = {
+        meta_data: {
+          action_url: params.success
+            ? `${new URL(config.CLIENT_BASE_URL).origin}/post/${post.id}`
+            : `${
+                new URL(config.CLIENT_BASE_URL).origin
+              }/profile/${created_by}?tab=reviewing`,
+        },
+        title: params.success
+          ? `"${post.title}" have published successfully`
+          : `"${post.title}" have failed to publish`,
+        content: params.message,
+      };
+      const uidsToNotify = [created_by];
+      const createNotificationsDto: InternalCreateNotificationDto[] =
+        uidsToNotify.map((uid) => ({
+          recipient_id: uid,
+          created_by: created_by,
+          ...notificationBody,
+        }));
+
+      await this.createMultiple(createNotificationsDto);
+      this.redisClient.publish(
+        'notifications',
+        JSON.stringify({
+          event: 'notification:created',
+          token: config.SOCKET_EVENT_SECRET,
+          uids: uidsToNotify,
+        }),
+      );
+      this.pushNotificationsService.push(uidsToNotify, notificationBody);
+    } catch (error) {
+      this.logger.error(
+        'Error handling notifyPostReviewed',
+        JSON.stringify(error),
+      );
+    }
+  }
+
   async notifyPostCreated(postId: string) {
     try {
       const post = await firstValueFrom<Post>(

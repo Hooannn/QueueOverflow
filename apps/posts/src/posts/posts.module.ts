@@ -26,6 +26,17 @@ import config from 'src/configs';
         },
       },
       {
+        name: 'REVIEW_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [config.RABBITMQ_URL],
+          queue: 'review_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+      {
         name: 'SEARCH_SERVICE',
         transport: Transport.RMQ,
         options: {

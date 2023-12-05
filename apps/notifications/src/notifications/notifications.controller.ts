@@ -66,6 +66,19 @@ export class NotificationsController {
     return this.notificationsService.notifyPostCreated(postId);
   }
 
+  @EventPattern('post.reviewed')
+  async notifyPostReviewed(
+    @Payload()
+    params: {
+      postId: string;
+      success: boolean;
+      message: string;
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    return this.notificationsService.notifyPostReviewed(params);
+  }
+
   @EventPattern('comment.created')
   async notifyCommentCreated(
     @Payload() params: { postId: string; commentId: string },

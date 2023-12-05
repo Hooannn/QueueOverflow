@@ -20,9 +20,10 @@ import {
   QueryPostDto,
   UpdatePostDto,
 } from '@queueoverflow/shared/dtos';
-import { PostVote, Post as QPost } from '@queueoverflow/shared/entities';
+import { PostVote, Post as QPost, Role } from '@queueoverflow/shared/entities';
 import { firstValueFrom } from 'rxjs';
 import { Response } from '@queueoverflow/shared/utils';
+import { Roles } from 'src/auth/auth.roles';
 
 @Controller({
   version: '1',
@@ -47,7 +48,8 @@ export class PostsGatewayController {
       return new Response<QPost>({
         code: 201,
         success: true,
-        message: 'Created',
+        message:
+          'Your post is under review.\nIt will take a while to complete.\nYou can visit the reviewed posts in your profile section.',
         data: post,
       });
     } catch (error) {
@@ -119,6 +121,36 @@ export class PostsGatewayController {
       }>(
         this.postsClient.send('post.find_all_by_uid', {
           queryDto: { ...queryDto, relations },
+          userId: req.auth?.userId,
+        }),
+      );
+
+      return new Response<QPost[]>({
+        code: 200,
+        success: true,
+        total,
+        took: data.length,
+        data,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('reviewing')
+  async findReviewingPosts(
+    @Req() req,
+    @Query() queryDto: QueryDto,
+    @Query('relations', new ParseArrayPipe({ optional: true }))
+    relations?: string[],
+  ) {
+    try {
+      const { data, total } = await firstValueFrom<{
+        data: QPost[];
+        total?: number;
+      }>(
+        this.postsClient.send('post.find_reviewing', {
+          query: { ...queryDto, relations },
           userId: req.auth?.userId,
         }),
       );
@@ -225,6 +257,62 @@ export class PostsGatewayController {
     }
   }
 
+  @Get(':id/reviewing')
+  async findReviewingOne(@Param('id') id: string, @Req() req) {
+    try {
+      const post = await firstValueFrom<QPost>(
+        this.postsClient.send('post.find_reviewing_by_id', {
+          userId: req.auth?.userId,
+          postId: id,
+        }),
+      );
+
+      if (req.auth?.userId) {
+        firstValueFrom(
+          this.postsClient.send('user_history.create', {
+            userId: req.auth?.userId,
+            postId: id,
+          }),
+        );
+      }
+
+      return new Response<QPost>({
+        code: 200,
+        success: true,
+        data: post,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get(':id/published')
+  async findPublishedOne(@Param('id') id: string, @Req() req) {
+    try {
+      const post = await firstValueFrom<QPost>(
+        this.postsClient.send('post.find_published_by_id', id),
+      );
+
+      if (req.auth?.userId) {
+        firstValueFrom(
+          this.postsClient.send('user_history.create', {
+            userId: req.auth?.userId,
+            postId: id,
+          }),
+        );
+      }
+
+      return new Response<QPost>({
+        code: 200,
+        success: true,
+        data: post,
+      });
+    } catch (error) {
+      throw new HttpException(error, error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Roles(Role.Admin)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req) {
     try {

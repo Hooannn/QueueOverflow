@@ -1,6 +1,6 @@
 from flask import Flask
 from dotenv import load_dotenv
-from consumer import start as start_consumer
+from posts_review.main import start_review_queue_consumer
 from flask_cors import CORS
 
 load_dotenv()
@@ -13,7 +13,7 @@ def index():
     return "ok"
 
 if __name__ == '__main__':
-    start_consumer()
+    start_review_queue_consumer()
     
     from posts import controller as posts_controller
     app.register_blueprint(posts_controller.bp)

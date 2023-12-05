@@ -1,11 +1,10 @@
 flask
-Flask-Migrate
 psycopg2-binary
 python-dotenv
 pika
-seaborn
 transformers
 torch
 beautifulsoup4
 flask_cors
-scikit-learn
+alt-profanity-check
+sqlalchemy

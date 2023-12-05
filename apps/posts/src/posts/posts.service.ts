@@ -31,6 +31,8 @@ export class PostsService {
     private readonly searchClient: ClientProxy,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
+    @Inject('REVIEW_SERVICE')
+    private readonly reviewClient: ClientProxy,
   ) {}
 
   private userFindOptionsSelect: FindOptionsSelect<User> = {
@@ -76,9 +78,62 @@ export class PostsService {
       created_by: createdBy,
     });
     const res = await this.postsRepository.save(post);
+    this.reviewClient.emit('post.created', res);
     this.searchClient.emit('post.created', [res]);
-    this.notificationsClient.emit('post.created', post.id);
     return res;
+  }
+
+  async update_(id: string, updatePostDto: UpdatePostDto) {
+    await this.postsRepository.update(
+      {
+        id,
+      },
+      updatePostDto,
+    );
+    const updatedRecord = await this.findOne(id);
+    this.searchClient.emit('post.updated', updatedRecord);
+    return updatedRecord;
+  }
+
+  async update(id: string, updatePostDto: UpdatePostDto, updatedBy?: string) {
+    const existingRecord = await this.postsRepository.findOne({
+      where: { id, created_by: updatedBy },
+    });
+
+    if (!existingRecord) {
+      throw new RpcException({
+        message: 'Forbidden request',
+        status: HttpStatus.FORBIDDEN,
+      });
+    }
+
+    existingRecord.topics = updatePostDto.topics as any;
+    existingRecord.title = updatePostDto.title;
+    existingRecord.content = updatePostDto.content;
+    existingRecord.type = updatePostDto.type;
+    existingRecord.tags = updatePostDto.tags;
+    existingRecord.meta_data = updatePostDto.meta_data;
+    await this.postsRepository.save(existingRecord);
+    const updatedRecord = await this.findOne(id);
+    this.searchClient.emit('post.updated', updatedRecord);
+
+    //Todo: do the thing here
+    //this.reviewClient.emit('post.updated', updatedRecord);
+    return updatedRecord;
+  }
+
+  async onPostReviewed(postId: string, success: boolean, message: string) {
+    try {
+      await this.update_(postId, { publish: success });
+      if (success) this.notificationsClient.emit('post.created', postId);
+      this.notificationsClient.emit('post.reviewed', {
+        postId,
+        success,
+        message,
+      });
+    } catch (error) {
+      await this.update_(postId, { publish: false });
+    }
   }
 
   async findRelated(postId: string) {
@@ -87,7 +142,7 @@ export class PostsService {
     >(`${config.RECOMMENDATIONS_HOST}/posts/${postId}/related`);
     if (!res.data.length) return [];
     let posts = await this.postsRepository.find({
-      where: res.data.map((r) => ({ id: r.id })),
+      where: res.data.map((r) => ({ id: r.id, publish: true })),
       relations: {
         votes: true,
       },
@@ -101,6 +156,9 @@ export class PostsService {
 
   async findAll(query: QueryPostDto) {
     const findOptions: FindManyOptions<Post> = {
+      where: {
+        publish: true,
+      },
       select: this.findOptionsSelect,
       skip: query.offset,
       take: query.limit,
@@ -110,12 +168,16 @@ export class PostsService {
       },
     };
     const countOptions: FindManyOptions<Post> = {
+      where: {
+        publish: true,
+      },
       select: { id: true },
     };
     if (query.topicIds?.length) {
       const where: FindOptionsWhere<Post>[] = query.topicIds.map((topicId) => ({
         topics: { id: topicId },
       }));
+      where.push({ publish: true });
       findOptions.where = where;
       countOptions.where = where;
     }
@@ -136,6 +198,7 @@ export class PostsService {
       select: this.findOptionsSelect,
       where: {
         created_by: userId,
+        publish: true,
       },
       skip: query.offset,
       take: query.limit,
@@ -145,14 +208,14 @@ export class PostsService {
       },
     };
     const countOptions: FindManyOptions<Post> = {
-      where: { created_by: userId },
+      where: { created_by: userId, publish: true },
       select: { id: true },
     };
     if (query.topicIds?.length) {
       const where: FindOptionsWhere<Post>[] = query.topicIds.map((topicId) => ({
         topics: { id: topicId },
       }));
-      where.push({ created_by: userId });
+      where.push({ created_by: userId, publish: true });
       findOptions.where = where;
       countOptions.where = where;
     }
@@ -166,6 +229,60 @@ export class PostsService {
       data,
       total,
     };
+  }
+
+  async findPublishedOne(id: string) {
+    const res = await this.postsRepository.findOne({
+      select: this.findOptionsSelect,
+      where: {
+        id,
+        publish: true,
+      },
+      relations: {
+        topics: true,
+        creator: true,
+        votes: true,
+        comments: {
+          creator: true,
+          votes: true,
+        },
+      },
+    });
+    res.comments = res.comments
+      .sort(function (a, b) {
+        return (
+          (new Date(b.created_at) as any) - (new Date(a.created_at) as any)
+        );
+      })
+      .reverse();
+    return res;
+  }
+
+  async findReviewingOne(params: { userId: string; postId: string }) {
+    const res = await this.postsRepository.findOne({
+      select: this.findOptionsSelect,
+      where: {
+        id: params.postId,
+        created_by: params.userId,
+      },
+      relations: {
+        topics: true,
+        creator: true,
+        votes: true,
+        comments: {
+          creator: true,
+          votes: true,
+        },
+      },
+    });
+    res.comments = res.comments
+      .sort(function (a, b) {
+        return (
+          (new Date(b.created_at) as any) - (new Date(a.created_at) as any)
+        );
+      })
+      .reverse();
+    return res;
   }
 
   async findOne(id: string) {
@@ -184,7 +301,6 @@ export class PostsService {
         },
       },
     });
-
     res.comments = res.comments
       .sort(function (a, b) {
         return (
@@ -193,19 +309,6 @@ export class PostsService {
       })
       .reverse();
     return res;
-  }
-
-  async update(id: string, updatePostDto: UpdatePostDto, updatedBy?: string) {
-    await this.postsRepository.update(
-      {
-        id,
-        created_by: updatedBy,
-      },
-      updatePostDto,
-    );
-    const updatedRecord = await this.findOne(id);
-    this.searchClient.emit('post.updated', updatedRecord);
-    return updatedRecord;
   }
 
   async remove(id: string, removedBy?: string) {
@@ -225,6 +328,36 @@ export class PostsService {
     return res;
   }
 
+  async findReviewingPosts(query: QueryDto, userId: string) {
+    const findOptions: FindManyOptions<Post> = {
+      select: this.findOptionsSelect,
+      where: {
+        created_by: userId,
+        publish: false,
+      },
+      skip: query.offset,
+      take: query.limit,
+      relations: (query as any).relations ?? [],
+      order: {
+        updated_at: -1,
+      },
+    };
+    const countOptions: FindManyOptions<Post> = {
+      where: { created_by: userId, publish: false },
+      select: { id: true },
+    };
+
+    const [data, total] = await Promise.all([
+      this.postsRepository.find(findOptions),
+      this.postsRepository.count(countOptions),
+    ]);
+
+    return {
+      data,
+      total,
+    };
+  }
+
   async findUpvotedPosts(query: QueryDto, userId: string) {
     const findOptions: FindManyOptions<PostVote> = {
       skip: query.offset,
@@ -232,6 +365,9 @@ export class PostsService {
       where: {
         uid: userId,
         type: VoteType.Up,
+        post: {
+          publish: true,
+        },
       },
       select: {
         post: {
@@ -254,7 +390,13 @@ export class PostsService {
     };
     const countOptions: FindManyOptions<PostVote> = {
       select: { post_id: true },
-      where: { uid: userId },
+      where: {
+        uid: userId,
+        type: VoteType.Up,
+        post: {
+          publish: true,
+        },
+      },
     };
 
     const [data, total] = await Promise.all([
@@ -272,6 +414,9 @@ export class PostsService {
       where: {
         uid: userId,
         type: VoteType.Down,
+        post: {
+          publish: true,
+        },
       },
       select: {
         post: {
@@ -294,7 +439,13 @@ export class PostsService {
     };
     const countOptions: FindManyOptions<PostVote> = {
       select: { post_id: true },
-      where: { uid: userId },
+      where: {
+        uid: userId,
+        type: VoteType.Down,
+        post: {
+          publish: true,
+        },
+      },
     };
 
     const [data, total] = await Promise.all([
