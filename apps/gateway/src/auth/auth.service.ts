@@ -228,9 +228,9 @@ export class AuthService {
       const legalToken = await this.redisClient.get(
         `refresh_token:${belongsTo}`,
       );
-      await this.jwtService.verifyAsync(legalToken ?? '', {
-        secret: config.REFRESH_TOKEN_SECRET,
-      });
+      if (legalToken !== requestToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
 
       const legalUser = await firstValueFrom<User>(
         this.usersClient.send('user.find_by_id', belongsTo),
