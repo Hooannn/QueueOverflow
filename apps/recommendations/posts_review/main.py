@@ -5,6 +5,33 @@ import pika
 from . import utils
 url = os.environ.get('RABBITMQ_URL')
 
+def on_post_updated(post_data: dict):
+    try:
+        title = post_data.get("title")
+        is_nsfw = utils.is_nsfw(title)
+        if is_nsfw:
+            notify_updated_post_reviewed_fail(post_data.get('id'), "Sensitive content detected. Please change your title then resubmit again. All the rejected posts will be removed in 7 days.")
+            return
+        
+        content = post_data.get("content")
+        plain_text, parsed_success = utils.parse_html(content)
+
+        if not parsed_success:
+            notify_updated_post_reviewed_fail(post_data.get('id'), "Something went wrong. Please re-submit again. All the rejected posts will be removed in 7 days.")
+            return
+        
+        is_nsfw = utils.is_nsfw(plain_text)
+
+        if is_nsfw:
+            notify_updated_post_reviewed_fail(post_data.get('id'), "Sensitive content detected. Please change your content then resubmit again. All the rejected posts will be removed in 7 days.")
+            return
+        
+        notify_updated_post_reviewed_success(post_data.get('id'), "Ready to publish")
+
+    except Exception as e:
+        print(f" Exception handling message {str(e)}", flush=True)
+
+
 def on_post_created(post_data: dict):
     try:
         title = post_data.get("title")
@@ -31,9 +58,37 @@ def on_post_created(post_data: dict):
     except Exception as e:
         print(f" Exception handling message {str(e)}", flush=True)
 
+
 event_handlers = {
-    "post.created": on_post_created
+    "post.created": on_post_created,
+    "post.updated": on_post_updated
 }
+
+
+def notify_updated_post_reviewed_fail(post_id: str, message: str):
+    raw_message = {
+        "pattern": "post.updated.reviewed",
+        "data": {
+            "postId": post_id,
+            "message": message,
+            "success": False,
+        }
+    }
+    json_message = json.dumps(raw_message)
+    publish_message_to_posts_queue(json_message)
+
+
+def notify_updated_post_reviewed_success(post_id: str, message: str):
+    raw_message = {
+        "pattern": "post.updated.reviewed",
+        "data": {
+            "postId": post_id,
+            "message": message,
+            "success": True,
+        }
+    }
+    json_message = json.dumps(raw_message)
+    publish_message_to_posts_queue(json_message)
 
 
 def notify_post_reviewed_fail(post_id: str, message: str):

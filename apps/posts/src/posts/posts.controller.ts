@@ -359,4 +359,27 @@ export class PostsController {
       );
     }
   }
+
+  @EventPattern('post.updated.reviewed')
+  async onUpdatedPostReviewed(
+    @Payload()
+    params: {
+      postId: string;
+      success: boolean;
+      message: string;
+    },
+  ) {
+    try {
+      this.postsService.onUpdatedPostReviewed(
+        params.postId,
+        params.success,
+        params.message,
+      );
+    } catch (error) {
+      this.logger.error(
+        error.message ||
+          'Error on onUpdatedPostReviewed ' + JSON.stringify(params),
+      );
+    }
+  }
 }

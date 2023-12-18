@@ -5,9 +5,7 @@ services:
     build:
       context: apps/gateway
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./apps/gateway:/app
+      target: production
     ports:
       - "3000:3000"
     environment:
@@ -32,9 +30,7 @@ services:
     build:
       context: apps/notifications
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./apps/notifications:/app
+      target: production
     ports:
       - "3001:3001"
     environment:
@@ -53,11 +49,9 @@ services:
     build:
       context: apps/users
       dockerfile: Dockerfile
-      target: development
+      target: production
     depends_on:
       - redis
-    volumes:
-      - ./apps/users:/app
     ports:
       - "3002:3002"
     environment:
@@ -71,9 +65,7 @@ services:
     build:
       context: apps/cms
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./apps/cms:/app
+      target: production
     ports:
       - "3003:3003"
     depends_on:
@@ -89,9 +81,7 @@ services:
     build:
       context: apps/posts
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./apps/posts:/app
+      target: production
     ports:
       - "3004:3004"
     depends_on:
@@ -123,9 +113,7 @@ services:
     build:
       context: apps/search
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./apps/search:/app
+      target: production
     depends_on:
       - redis
       - elasticsearch
@@ -151,8 +139,6 @@ services:
     environment:
       - DATABASE_URL=postgresql://hoanthui123:t3bi4hmxSYBr@ep-wandering-cake-16204738.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
       - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
-    volumes:
-      - ./apps/recommendations:/app
 
 networks:
   queueoverflow:

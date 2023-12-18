@@ -115,11 +115,28 @@ export class PostsService {
     existingRecord.meta_data = updatePostDto.meta_data;
     await this.postsRepository.save(existingRecord);
     const updatedRecord = await this.findOne(id);
-    this.searchClient.emit('post.updated', updatedRecord);
 
-    //Todo: do the thing here
-    //this.reviewClient.emit('post.updated', updatedRecord);
+    this.searchClient.emit('post.updated', updatedRecord);
+    this.reviewClient.emit('post.updated', updatedRecord);
     return updatedRecord;
+  }
+
+  async onUpdatedPostReviewed(
+    postId: string,
+    success: boolean,
+    message: string,
+  ) {
+    try {
+      await this.update_(postId, { publish: success });
+      if (!success)
+        this.notificationsClient.emit('post.reviewed', {
+          postId,
+          success,
+          message,
+        });
+    } catch (error) {
+      await this.update_(postId, { publish: false });
+    }
   }
 
   async onPostReviewed(postId: string, success: boolean, message: string) {
