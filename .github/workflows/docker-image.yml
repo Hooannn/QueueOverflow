@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Start docker-compose
-        run: sudo docker-compose -f "docker-compose-prod.yml" up -d
+        run: docker compose -f "docker-compose-prod.yml" up -d
       - name: Clean up
-        run: sudo docker system prune -f
+        run: docker system prune -f
