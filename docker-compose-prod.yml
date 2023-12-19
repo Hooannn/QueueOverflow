@@ -9,14 +9,29 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3000
       - SOCKET_EVENT_SECRET=wTD0y:6Ch(Z|H[Xh<rp"1Gx)3J]N[c
       - REDIS_HOST=redis
       - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
       - REDIS_PORT=6379
+      - SALTED_PASSWORD=10
+      - ACCESS_TOKEN_SECRET=XtitPOagxC
+      - ACCESS_TOKEN_LIFE=1h
+      - REFRESH_TOKEN_SECRET=grvtq3QvYU
+      - REFRESH_TOKEN_LIFE=2592000
+      - PASSWORD_LIFE=600
+      - REFRESH_TOKEN_LIFE_D=30d
+      - PGHOST=postgres
+      - PGDATABASE=default
+      - PGUSER=default
+      - PGPASSWORD=9yEumx4mEb
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
+      - GITHUB_CLIENT_ID=Iv1.98f469e0d7ac7fd6
+      - GITHUB_CLIENT_SECRET=c39a56aa94bb5a2eb788fc17ece6be6422c42cf9
     depends_on:
       - redis
+      - postgres
   
   redis:
     image: redis
@@ -34,32 +49,47 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3001
       - GATEWAY_PORT=3000
       - SOCKET_EVENT_SECRET=wTD0y:6Ch(Z|H[Xh<rp"1Gx)3J]N[c
       - REDIS_HOST=redis
       - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
       - REDIS_PORT=6379
-      - CLIENT_BASE_URL=http://127.0.0.1:8000
+      - CLIENT_BASE_URL=https://queueoverflow.online
+      - GMAIL_USER=4rumservice@gmail.com
+      - GMAIL_PASSWORD=stanuozjbzxtlfrl
+      - PGHOST=postgres
+      - PGDATABASE=default
+      - PGUSER=default
+      - PGPASSWORD=9yEumx4mEb
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
     depends_on:
       - redis
+      - postgres
 
   users:
     build:
       context: apps/users
       dockerfile: Dockerfile
       target: production
-    depends_on:
-      - redis
     ports:
       - "3002:3002"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3002
       - REDIS_HOST=redis
       - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
       - REDIS_PORT=6379
+      - SALTED_PASSWORD=10
+      - PGHOST=postgres
+      - PGDATABASE=default
+      - PGUSER=default
+      - PGPASSWORD=9yEumx4mEb
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
+    depends_on:
+      - redis
+      - postgres
 
   cms:
     build:
@@ -70,12 +100,18 @@ services:
       - "3003:3003"
     depends_on:
       - redis
+      - postgres
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3003
       - REDIS_HOST=redis
       - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
       - REDIS_PORT=6379
+      - PGHOST=postgres
+      - PGDATABASE=default
+      - PGUSER=default
+      - PGPASSWORD=9yEumx4mEb
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
 
   posts:
     build:
@@ -86,13 +122,19 @@ services:
       - "3004:3004"
     depends_on:
       - redis
+      - postgres
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3004
       - REDIS_HOST=redis
       - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
       - REDIS_PORT=6379
       - RECOMMENDATIONS_HOST=http://recommendations:8000
+      - PGHOST=postgres
+      - PGDATABASE=default
+      - PGUSER=default
+      - PGPASSWORD=9yEumx4mEb
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
 
   elasticsearch:
     image: elasticsearch:8.10.2
@@ -117,19 +159,18 @@ services:
     depends_on:
       - redis
       - elasticsearch
+      - postgres
     networks:
       - queueoverflow
     ports:
       - "3005:3005"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3005
       - ELASTICSEARCH_NODE=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=elastic
       - ELASTICSEARCH_PASSWORD=Y3KgattXgebGXUd
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=9QYVMZNxuSmPp1GyvNs38FKh4rqBMZfCMrCWkXlnmpSm
-      - REDIS_PORT=6379
+      - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
     
   recommendations:
     build:
@@ -137,8 +178,20 @@ services:
     ports:
       - "8000:3006"
     environment:
-      - DATABASE_URL=postgresql://hoanthui123:t3bi4hmxSYBr@ep-wandering-cake-16204738.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      - DATABASE_URL=postgresql://default:9yEumx4mEb@postgres/default
       - RABBITMQ_URL=amqps://pkeilyyo:nfbO7ZksScLaUj47ml4lPp3upf2fLHtN@octopus.rmq3.cloudamqp.com/pkeilyyo
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: 9yEumx4mEb
+      POSTGRES_DB: default
 
 networks:
   queueoverflow:
