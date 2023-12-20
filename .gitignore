@@ -6,7 +6,7 @@ dist
 *.log
 
 #accountService.json
-http_ca.crt
+#http_ca.crt
 .idea
 data
 .DS_STORE

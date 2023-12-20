@@ -12,7 +12,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Build gateway image
+        run: docker compose -f "docker-compose-prod.yml" build gateway
+
+      - name: Build notifications image
+        run: docker compose -f "docker-compose-prod.yml" build notifications
+
+      - name: Build users image
+        run: docker compose -f "docker-compose-prod.yml" build users
+
+      - name: Build cms image
+        run: docker compose -f "docker-compose-prod.yml" build cms
+
+      - name: Build posts image
+        run: docker compose -f "docker-compose-prod.yml" build posts
+
+      - name: Build search image
+        run: docker compose -f "docker-compose-prod.yml" build search
+
+      - name: Build recommendations image
+        run: docker compose -f "docker-compose-prod.yml" build recommendations
+
       - name: Start docker-compose
         run: docker compose -f "docker-compose-prod.yml" up -d
-      - name: Clean up
-        run: docker system prune -f

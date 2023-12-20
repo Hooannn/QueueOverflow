@@ -17,7 +17,7 @@ import { PushNotificationsModule } from './push-notifications/push-notifications
       password: config.PGPASSWORD,
       logging: config.NODE_ENV !== 'production',
       port: 5432,
-      ssl: true,
+      ssl: false,
       autoLoadEntities: true,
       synchronize: true,
     }),

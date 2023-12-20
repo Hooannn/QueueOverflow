@@ -16,7 +16,7 @@ import { User } from '@queueoverflow/shared/entities';
       password: config.PGPASSWORD,
       logging: config.NODE_ENV !== 'production',
       port: 5432,
-      ssl: true,
+      ssl: false,
       entities: [User],
       autoLoadEntities: true,
       synchronize: true,

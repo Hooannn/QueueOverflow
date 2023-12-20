@@ -20,7 +20,7 @@ import { UserHistoriesModule } from './user_histories/user_histories.module';
       password: config.PGPASSWORD,
       logging: config.NODE_ENV !== 'production',
       port: 5432,
-      ssl: true,
+      ssl: false,
       autoLoadEntities: true,
       entities: [User, Topic],
       synchronize: true,
